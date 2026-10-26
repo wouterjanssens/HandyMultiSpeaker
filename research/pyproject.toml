@@ -1,0 +1,19 @@
+[project]
+name = "meetscribe-research"
+version = "0.1.0"
+description = "Phase 1 reference implementation for Nemotron 3 Diarization (not part of the app build)"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "transformers>=5.18.0",
+  "torch>=2.6",
+  "soundfile>=0.13",
+  "numpy>=2",
+  "scipy>=1.14",
+  "huggingface_hub>=0.30",
+  "pyannote.metrics>=3.2",
+  "pyarrow>=26.0.0",
+  "librosa>=1.0.0",
+]
+
+[tool.uv]
+package = false

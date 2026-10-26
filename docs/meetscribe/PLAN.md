@@ -3,6 +3,7 @@
 ## 2026-10-26 – Phase 0: fork, build, recon
 
 Plan:
+
 1. Install missing tooling (rustup, bun, uv, cmake via Homebrew).
 2. Use the existing fork `wouterjanssens/HandyMultiSpeaker` (origin) + `cjpais/Handy` (upstream);
    branch `meeting-mode`.

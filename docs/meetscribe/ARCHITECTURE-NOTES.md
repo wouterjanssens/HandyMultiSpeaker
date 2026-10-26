@@ -5,7 +5,7 @@ done 2026-10-26. Paths are relative to `src-tauri/src/` unless noted. Line numbe
 them as pointers, not contracts.
 
 > **Upstream has moved since the handoff was written.** There is no `transcribe-rs`, `vad-rs` or
-> direct `cpal` use in the app any more. Capture is the `handy-recorder` crate, and *every* model
+> direct `cpal` use in the app any more. Capture is the `handy-recorder` crate, and _every_ model
 > (Whisper, Parakeet, Nemotron, VAD, …) runs through `transcribe-cpp` (GGUF/ggml, Metal on Mac),
 > in a **separate worker process**.
 
@@ -15,13 +15,14 @@ them as pointers, not contracts.
 
 Crate: `handy-recorder 0.1` (wraps `handy-cpal`). Three threads (`handy-recorder/src/capture/engine.rs`):
 
-| Thread | Does |
-|---|---|
-| `handy-recorder-device` | owns the cpal stream + watchdog; the callback writes device-rate frames into an SPSC ring (2 s) |
+| Thread                    | Does                                                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `handy-recorder-device`   | owns the cpal stream + watchdog; the callback writes device-rate frames into an SPSC ring (2 s)                                              |
 | `handy-recorder-delivery` | drains ring → resamples (rubato `Fft`, 1024-frame blocks) → cuts exact chunks → `Sink::process_chunk`. **All app code incl. VAD runs here.** |
-| `handy-recorder-notify` | failure notifications |
+| `handy-recorder-notify`   | failure notifications                                                                                                                        |
 
 App side (`managers/audio.rs`):
+
 - `microphone_config()` → `RecorderConfig::speech()`: 16 kHz mono. `frames_per_chunk` = VAD frame
   (Silero 512 = 32 ms, Earshot 256 = 16 ms).
 - The stream is opened by `start_microphone_stream()` and can stay open between recordings
@@ -30,6 +31,7 @@ App side (`managers/audio.rs`):
   `CaptureSink::finish()` returns the `Vec<f32>`. Clips < 1 s are zero-padded to 1.25 s.
 
 `CaptureSink::process_chunk` (`audio_toolkit/audio/sink.rs`):
+
 - every chunk → level visualiser;
 - `VadPolicy::Disabled` → every frame kept; otherwise `SmoothedVad` decides and **noise frames are
   dropped**. Pre-roll 450 ms is emitted as a burst at onset; onset 60 ms; hangover 450 ms
@@ -39,6 +41,7 @@ App side (`managers/audio.rs`):
 Silero VAD runs **in-process** (CPU `transcribe_cpp::VadSession`), not in the worker.
 
 ### Timeline hazards (matter for Phase 4)
+
 1. **No sample clock exists.** `AudioChunk` has no position; the recorder's frame counters are private.
    → Meeting mode must count samples itself in its sink.
 2. **VAD drops samples.** Anything downstream of the existing sink lives on a compacted timeline.
@@ -69,12 +72,12 @@ Supervisor API (`engine_supervisor/supervisor.rs`): `transcribe(pcm, RunOptions)
 `segments[] {t0_ms,t1_ms,text,speaker_id}`, `words[] {t0_ms,t1_ms,text}`, `tokens[]`,
 `speaker_segments[]`.
 
-| Granularity | Families |
-|---|---|
-| token (+ words) | Parakeet (incl. TDT v3, multitalker, Nemotron streaming), GigaAM, MedASR |
-| word | Granite |
-| **segment only** | **Whisper** (DTW word timing "not yet implemented"), MOSS |
-| none | Canary, Cohere, Qwen3-ASR, Voxtral, SenseVoice, Moonshine, … |
+| Granularity      | Families                                                                 |
+| ---------------- | ------------------------------------------------------------------------ |
+| token (+ words)  | Parakeet (incl. TDT v3, multitalker, Nemotron streaming), GigaAM, MedASR |
+| word             | Granite                                                                  |
+| **segment only** | **Whisper** (DTW word timing "not yet implemented"), MOSS                |
+| none             | Canary, Cohere, Qwen3-ASR, Voxtral, SenseVoice, Moonshine, …             |
 
 → For per-word speaker alignment use **Parakeet V3** (multilingual, incl. Dutch). Whisper only
 gives segment timing; we'd align per segment.
@@ -101,7 +104,7 @@ resampler delay) → WAV → `transcribe_in_chunks`. Also a headless CLI
   `settings.general.shortcut.bindings.<id>`, render `<ShortcutInput shortcutId=…/>`.
 - **CLI**: `cli.rs` (clap derive) + `lib.rs` single-instance callback that matches **raw argv
   strings** (`--toggle-transcription`, …). `--toggle-meeting` = add the field + one `else if` arm.
-  Note: toggle flags on the *first* launch are currently ignored by upstream.
+  Note: toggle flags on the _first_ launch are currently ignored by upstream.
 - Signals: SIGUSR2/SIGUSR1 → `signal_handle::send_transcription_input`.
 - **Tray** (`tray.rs`): desired-state diffing (`MenuInputs` → `compute_desired` → `build_menu`),
   two layouts (busy/idle); click handlers in `lib.rs` `on_menu_event`. Strings are generated by
@@ -122,12 +125,13 @@ resampler delay) → WAV → `transcribe_in_chunks`. Also a headless CLI
   `CloseRequested` handler (it hides every window and demotes the app on macOS).
 - **Data dir** = Tauri `app_data_dir()` derived from the **bundle identifier** (or `<exe>/Data` in
   portable mode). ⚠ **Models are downloaded via `hf-hub` into the shared
-  `~/.cache/huggingface/hub`**, so the fork shares model *files* with an installed Handy even with a
+  `~/.cache/huggingface/hub`**, so the fork shares model _files_ with an installed Handy even with a
   different identifier. Read sharing is fine; deleting a model in either app affects both.
 
 ## 5. Diarization already in the stack?
 
 **Partly, and unused.** `transcribe-cpp 0.4.0` (now 0.4.1) has:
+
 - a `DIARIZE` model role, `Model::diarize_session()` → `DiarizeSession::run(&pcm) -> Vec<SpeakerSegment>`;
   only family: **Sortformer v2.1, 4 speakers, 80 ms frames**; **one-shot over a whole buffer**
   (streaming AOSC/FIFO state is internal, no incremental feed);
