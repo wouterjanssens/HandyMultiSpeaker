@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Handy",
+  "productName": "MeetScribe",
   "version": "0.9.8",
   "identifier": "com.wouter.meetscribe",
   "build": {

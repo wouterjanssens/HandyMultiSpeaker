@@ -1,3 +1,7 @@
+> **This is MeetScribe**, a private fork of [Handy](https://github.com/cjpais/Handy) for local, speaker-attributed meeting transcription.
+> MeetScribe is not affiliated with or endorsed by the Handy project. Handy's name, logo and brand assets belong to the Handy project;
+> MeetScribe uses its own name and artwork. See [NOTICE](NOTICE) and [LICENSE](LICENSE) (MIT). The rest of this README is upstream Handy's.
+
 # Handy
 
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/WVBeWsNXK4)
