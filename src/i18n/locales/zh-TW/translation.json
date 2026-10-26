@@ -9,7 +9,8 @@
     "cancel": "取消",
     "secureInputWarning": "⚠ 快捷鍵被 Secure Input 阻擋",
     "startMeeting": "Start Meeting",
-    "stopMeeting": "Stop Meeting"
+    "stopMeeting": "Stop Meeting",
+    "openMeetingWindow": "Open Meeting Window"
   },
   "sidebar": {
     "general": "一般",

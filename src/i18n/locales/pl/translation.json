@@ -9,7 +9,8 @@
     "cancel": "Anuluj",
     "secureInputWarning": "⚠ Skróty zablokowane przez Secure Input",
     "startMeeting": "Start Meeting",
-    "stopMeeting": "Stop Meeting"
+    "stopMeeting": "Stop Meeting",
+    "openMeetingWindow": "Open Meeting Window"
   },
   "sidebar": {
     "general": "Ogólne",

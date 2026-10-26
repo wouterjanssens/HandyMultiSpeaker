@@ -9,7 +9,8 @@
     "cancel": "キャンセル",
     "secureInputWarning": "⚠ Secure Input でショートカットがブロック中",
     "startMeeting": "Start Meeting",
-    "stopMeeting": "Stop Meeting"
+    "stopMeeting": "Stop Meeting",
+    "openMeetingWindow": "Open Meeting Window"
   },
   "sidebar": {
     "general": "一般",

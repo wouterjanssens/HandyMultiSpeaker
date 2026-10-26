@@ -338,15 +338,19 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
         .collect();
     downloaded_models.sort_by(|a, b| a.1.cmp(&b.1));
 
-    // meetscribe: a running meeting shows the recording icon
+    // meetscribe: a running meeting shows the recording icon, but the busy
+    // (dictation) menu with its Cancel item stays tied to dictation, and the
+    // model can't be switched under a running meeting.
     let meeting = crate::meeting::phase(app);
-    let icon_state = if meeting == crate::meeting::MeetingPhase::Running {
+    let meeting_active = meeting != crate::meeting::MeetingPhase::Idle;
+    let models_locked = models_locked || meeting_active;
+    let icon_for = if meeting == crate::meeting::MeetingPhase::Running {
         TrayIconState::Recording
     } else {
         icon_state
     };
     TrayDesired {
-        icon_path: get_icon_path(theme, icon_state, warning),
+        icon_path: get_icon_path(theme, icon_for, warning),
         menu: MenuInputs {
             busy: icon_state.is_busy(),
             models_locked,
@@ -501,6 +505,19 @@ fn meeting_menu_item(
     MenuItem::with_id(app, "toggle_meeting", &label, enabled, None::<&str>)
 }
 
+// meetscribe: "Open Meeting Window", shown while a meeting is active.
+fn open_meeting_window_item(
+    app: &AppHandle,
+    strings: &crate::tray_i18n::TrayStrings,
+) -> tauri::Result<MenuItem<tauri::Wry>> {
+    let label = if strings.open_meeting_window.is_empty() {
+        get_tray_translations(Some("en".to_string())).open_meeting_window
+    } else {
+        strings.open_meeting_window.clone()
+    };
+    MenuItem::with_id(app, "open_meeting_window", &label, true, None::<&str>)
+}
+
 /// Builds the tray menu and tooltip for the given inputs. Pure with respect
 /// to app state: everything it depends on is in `inputs`, plus the
 /// process-constant `HANDY_DISABLE_UPDATER` env flag behind
@@ -635,6 +652,11 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
     // enabled flag.
     if settings::update_checks_forced_disabled() {
         menu.remove(&check_updates_i)?;
+    }
+
+    // meetscribe: both layouts start with [version, separator, meeting toggle]
+    if inputs.meeting != crate::meeting::MeetingPhase::Idle {
+        menu.insert(&open_meeting_window_item(app, &strings)?, 3)?;
     }
 
     // Both layouts start with [version, separator, ...]; slot the warning in

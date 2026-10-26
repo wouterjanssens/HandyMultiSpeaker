@@ -9,7 +9,8 @@
     "cancel": "ביטול",
     "secureInputWarning": "⚠ קיצורי המקשים חסומים על ידי Secure Input",
     "startMeeting": "Start Meeting",
-    "stopMeeting": "Stop Meeting"
+    "stopMeeting": "Stop Meeting",
+    "openMeetingWindow": "Open Meeting Window"
   },
   "sidebar": {
     "general": "כללי",

@@ -289,6 +289,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                 show_main_window(app);
             }
             "toggle_meeting" => meeting::toggle(app), // meetscribe
+            "open_meeting_window" => meeting::show_window(app), // meetscribe
             "secure_input_warning" => {
                 // Full explanation lives in the settings-window banner
                 show_main_window(app);
