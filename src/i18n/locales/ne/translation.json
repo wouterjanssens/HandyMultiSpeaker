@@ -1025,6 +1025,8 @@
     "dismiss": "Dismiss",
     "asrDelay": "Speech → text {{ms}} ms",
     "diarizerLag": "speakers settle after {{ms}} ms",
-    "utterances": "{{count}} utterances"
+    "utterances": "{{count}} utterances",
+    "copy": "Copy transcript",
+    "copied": "Copied"
   }
 }

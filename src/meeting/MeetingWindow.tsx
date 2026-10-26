@@ -52,6 +52,13 @@ const hms = (ms: number) => {
   return `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
 };
 
+/** Same layout as the saved Markdown transcript, with current speaker names. */
+const transcriptText = (turns: TurnDto[]) =>
+  turns
+    .filter((t) => t.text.trim().length > 0)
+    .map((t) => `**${t.label}** [${hms(t.start_ms)}]: ${t.text}`)
+    .join("\n\n");
+
 const upsert = (turns: TurnDto[], turn: TurnDto) => {
   const i = turns.findIndex((t) => t.id === turn.id);
   if (i === -1) return [...turns, turn].sort((a, b) => a.id - b.id);
@@ -118,6 +125,7 @@ const MeetingWindow: React.FC = () => {
   const [output, setOutput] = useState<MeetingOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [copied, setCopied] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
 
@@ -189,6 +197,16 @@ const MeetingWindow: React.FC = () => {
     if (r.status === "error") setError(r.error);
   }, []);
 
+  const copyTranscript = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(transcriptText(turns));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      setError(String(e));
+    }
+  }, [turns]);
+
   const running = status.phase === "running";
   const busy = status.phase === "starting" || status.phase === "stopping";
   const elapsed =
@@ -232,7 +250,14 @@ const MeetingWindow: React.FC = () => {
           {status.phase === "starting" && t("meeting.starting")}
           {status.phase === "stopping" && t("meeting.stopping")}
         </span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="secondary"
+            disabled={turns.length === 0}
+            onClick={copyTranscript}
+          >
+            {copied ? t("meeting.copied") : t("meeting.copy")}
+          </Button>
           <Button
             variant={running ? "danger" : "primary"}
             disabled={busy}

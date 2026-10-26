@@ -1025,6 +1025,8 @@
     "dismiss": "Sluiten",
     "asrDelay": "Spraak → tekst {{ms}} ms",
     "diarizerLag": "sprekers vast na {{ms}} ms",
-    "utterances": "{{count}} fragmenten"
+    "utterances": "{{count}} fragmenten",
+    "copy": "Transcript kopiëren",
+    "copied": "Gekopieerd"
   }
 }
