@@ -257,7 +257,14 @@ jobs:
       - name: verify certificate
         if: contains(inputs.platform, 'macos') && inputs.sign-binaries
         run: |
-          CERT_INFO=$(security find-identity -v -p codesigning build.keychain | grep "Developer ID Application")
+          # meetscribe: also accept the self-signed "MeetScribe Local Signing" identity
+          # (docs/meetscribe/SIGNING.md). Without -v: a self-signed root isn't "valid"
+          # (trusted), but codesign signs with it fine and the app identity stays stable.
+          CERT_INFO=$(security find-identity -p codesigning build.keychain | grep -E "Developer ID Application|MeetScribe Local Signing" | head -1)
+          if [ -z "$CERT_INFO" ]; then
+            echo "::error::No code-signing identity found in the imported certificate"
+            exit 1
+          fi
           CERT_ID=$(echo "$CERT_INFO" | awk -F'"' '{print $2}')
           echo "CERT_ID=$CERT_ID" >> $GITHUB_ENV
           echo "Certificate imported."
