@@ -1,6 +1,6 @@
 # Handoff: Live multi-speaker fork of Handy (Nemotron 3 Diarization)
 
-You are Claude Code, working in an empty folder created for this project. Your job is to fork **cjpais/Handy**, set up the dev environment, and start building a **live, speaker-attributed meeting transcription mode** using **NVIDIA Nemotron 3 Diarization** as the streaming diarizer. This is the "hard path": speaker labels appear *during* the meeting, not only after it.
+You are Claude Code, working in an empty folder created for this project. Your job is to fork **cjpais/Handy**, set up the dev environment, and start building a **live, speaker-attributed meeting transcription mode** using **NVIDIA Nemotron 3 Diarization** as the streaming diarizer. This is the "hard path": speaker labels appear _during_ the meeting, not only after it.
 
 Read this whole file before doing anything. Work in phases, commit at the end of each phase, and stop at every **🛑 GATE** to report to me before continuing.
 
@@ -11,16 +11,18 @@ Read this whole file before doing anything. Work in phases, commit at the end of
 **Who I am:** Wouter, based in Belgium. I'm on an Apple Silicon Mac. I want this for physical meetings (one laptop or conference mic on the table, 2–6 people, often speaking Dutch/Flemish, sometimes English) so I can generate meeting notes with who-said-what.
 
 **Handy today** (https://github.com/cjpais/Handy, MIT):
+
 - Tauri v2 app. Rust backend, React + TypeScript + Tailwind frontend.
 - Key crates/libs: `transcribe-cpp` (Whisper-family, GGML/GGUF), `transcribe-rs` (Parakeet), `cpal` (audio I/O), `vad-rs` (Silero VAD), `rdev` (shortcuts), `rubato` (resampling).
 - Push-to-talk or toggle recording. Transcribes on release and pastes into the focused text field.
 - CLI: `handy --toggle-transcription`, `--toggle-post-process`, `--cancel`, `--start-hidden`, `--no-tray`, `--debug`.
 - All models now emit timestamps (upstream PR #1602). We need these for alignment.
-- The maintainer has said diarization and meeting transcription are out of scope for upstream (Discussion #599). This fork will **never** be merged upstream. Don't plan for that, but keep our code isolated so upstream updates can still be merged *into* the fork.
+- The maintainer has said diarization and meeting transcription are out of scope for upstream (Discussion #599). This fork will **never** be merged upstream. Don't plan for that, but keep our code isolated so upstream updates can still be merged _into_ the fork.
 - Handy's own GGUF port of `nvidia/multitalker-parakeet-streaming-0.6b-v1` ships **single-speaker mode only**. The diarization and multi-instance machinery was not ported. Don't assume any existing diarization code exists in Handy or transcribe.cpp. Verify, but expect none.
 
 **Nemotron 3 Diarization** (`nvidia/Nemotron-3-Diarization` on Hugging Face):
-- Open-weight, ~100M params, released Sept 2026. Diarization only: it outputs *who spoke when*, not words.
+
+- Open-weight, ~100M params, released Sept 2026. Diarization only: it outputs _who spoke when_, not words.
 - Up to **8 speakers**. Accuracy degrades above ~4, so make max-speakers configurable.
 - Sortformer-style: speakers are ordered by first arrival. Streaming uses an **Arrival-Order Speaker Cache (AOSC) + FIFO queue**.
 - Output: frame-level speaker-activity logits, shape `(1, num_frames, 8)`, one frame per **10 ms**.
@@ -33,6 +35,7 @@ Read this whole file before doing anything. Work in phases, commit at the end of
 ## 2. Goal and non-goals
 
 **Goal (end state):** A "Meeting mode" in the fork:
+
 1. Start or stop with a shortcut, a tray menu item, or the CLI (`--toggle-meeting`).
 2. While recording, a meeting window shows a live, growing transcript grouped into turns: `Speaker 1: …`, `Speaker 2: …`.
 3. Speakers can be renamed mid- or post-meeting (Speaker 2 → "Jan"), and the rename applies to the whole transcript.
@@ -45,7 +48,7 @@ Read this whole file before doing anything. Work in phases, commit at the end of
 
 ## 3. Hard constraints
 
-- **Branding:** Handy's README states the name, logo, icon and brand assets are *not* open source, and forks must use their own branding without implying endorsement. Before Phase 1, ask me for the project name. Until I answer, use the working name `MeetScribe` and the bundle identifier `com.wouter.meetscribe`. Replace all user-visible "Handy" names, icons and the bundle id (`com.pais.handy`) in the fork. Keep the upstream MIT license and copyright notice, and add a NOTICE line saying it's a fork of cjpais/Handy.
+- **Branding:** Handy's README states the name, logo, icon and brand assets are _not_ open source, and forks must use their own branding without implying endorsement. Before Phase 1, ask me for the project name. Until I answer, use the working name `MeetScribe` and the bundle identifier `com.wouter.meetscribe`. Replace all user-visible "Handy" names, icons and the bundle id (`com.pais.handy`) in the fork. Keep the upstream MIT license and copyright notice, and add a NOTICE line saying it's a fork of cjpais/Handy.
 - **Data dir:** use our own bundle id so the fork never touches an installed Handy's settings or models.
 - **Isolation:** put new Rust code in new modules (e.g. `src-tauri/src/meeting/`, a `diarize` crate). Keep edits to existing upstream files minimal and marked `// meetscribe:` so upstream merges stay easy.
 - **Model licence:** check the Nemotron 3 Diarization model card licence before bundling or auto-downloading weights, and report what it says at Gate 1.
@@ -100,6 +103,7 @@ Before touching Rust, prove the model works for my use case and produce referenc
 Goal: run the streaming step from Rust with no Python at runtime.
 
 **Primary route: ONNX + `ort` crate.**
+
 1. Export the model's **single streaming step** as an ONNX graph: inputs = audio features for one chunk + all carried state tensors; outputs = logits for the chunk + updated state tensors. Keep any non-tensor bookkeeping (e.g. AOSC selection logic, if it's implemented in Python control flow) **out of the graph** and plan to reimplement it in Rust. Document exactly what was split where.
 2. Check whether the feature extraction (mel/fbank) is inside the model or in the processor. If it's in the processor, either export it separately or reimplement it in Rust, and verify bit-close parity on the feature level first.
 3. Validate with `onnxruntime` in Python: run the exported step on the same chunks as Phase 1 and compare logits to the saved `.npy` references (target: max abs diff < 1e-3 on fp32; record the actual numbers).
@@ -107,6 +111,7 @@ Goal: run the streaming step from Rust with no Python at runtime.
 5. Check onnxruntime with the **CoreML execution provider** on the Mac. Record which ops fall back to CPU and the resulting speed.
 
 **Fallback routes, only if ONNX export of the streaming step fails or is too slow.** Don't start these without asking me:
+
 - **B:** Port the model to GGML inside our own fork of `transcribe.cpp` (big effort; Metal acceleration comes for free).
 - **C:** A Python sidecar process (PyTorch MPS) that the Tauri app talks to over stdin/stdout or a local socket. Fastest to working demo, but breaks the single-binary story. Acceptable as a temporary prototype.
 
@@ -142,6 +147,7 @@ Create a standalone crate, e.g. `src-tauri/crates/diarize` (or a workspace membe
 ## 8. Phase 4: Meeting mode in the app
 
 **Audio:** reuse Handy's capture pipeline, but in meeting mode keep a continuous stream instead of a push-to-talk buffer. Fan out the 16 kHz samples to:
+
 - the **diarizer** (continuous, small chunks, on its own worker thread), and
 - the **ASR worker**: transcribe each VAD-delimited utterance as soon as it ends (pseudo-streaming). Cap utterance length (e.g. 20–30 s) with a forced split so long monologues still appear. Use the user's selected Handy model. Parakeet V3 (multilingual, auto language detection) and Whisper should both be tested for Dutch.
 
@@ -152,6 +158,7 @@ Create a standalone crate, e.g. `src-tauri/crates/diarize` (or a workspace membe
 **Late corrections:** diarizer output for recent frames can change until they're finalized. Render the last few seconds as "tentative" (e.g. lighter text) and lock turns once finalized.
 
 **Wiring:**
+
 - New CLI flag `--toggle-meeting`, a new shortcut binding, and a tray item "Start/Stop meeting".
 - Meeting mode must **not** paste into the focused app.
 - Settings page section: max speakers (1–8, default 6), latency profile, output folder, save audio (off by default), ASR model for meetings.
@@ -159,13 +166,16 @@ Create a standalone crate, e.g. `src-tauri/crates/diarize` (or a workspace membe
 **Frontend:** a meeting window (React) subscribing to Tauri events: `meeting:turn_appended`, `meeting:turn_updated`, `meeting:speaker_renamed`, `meeting:stopped`. Click a speaker label to rename it. Show a recording timer and a speaker-count indicator.
 
 **Output:** on stop, flush both workers, finalize, and write Markdown:
+
 ```markdown
 # Meeting – 2026-10-26 14:00 (52 min)
+
 Speakers: Jan, Speaker 2, Wouter
 
 **Jan** [00:00:04]: …
 **Wouter** [00:00:31]: …
 ```
+
 Also write a sidecar JSON with word-level data for later use by an LLM summary step.
 
 🛑 **GATE 4:** Demo checklist: a 10+ minute live test with 3 speakers on the Mac. Report latency from speech to on-screen text, CPU usage, memory over time, and observed speaker errors.
@@ -198,6 +208,6 @@ Also write a sidecar JSON with word-level data for later use by an LLM summary s
 - Nemotron 3 Diarization model card: https://huggingface.co/nvidia/Nemotron-3-Diarization
 - NVIDIA blog post: https://huggingface.co/blog/nvidia/nemotron-diarization
 - Multitalker Parakeet (later phase): https://huggingface.co/nvidia/multitalker-parakeet-streaming-0.6b-v1
-- Handy's single-speaker GGUF port (shows what was *not* ported): https://huggingface.co/handy-computer/multitalker-parakeet-streaming-0.6b-v1-gguf
+- Handy's single-speaker GGUF port (shows what was _not_ ported): https://huggingface.co/handy-computer/multitalker-parakeet-streaming-0.6b-v1-gguf
 - Streaming multi-speaker ASR trade-offs (cascaded vs multi-instance): https://arxiv.org/pdf/2609.10265
 - Prior art using Nemotron 3 Diarization in a meeting app: https://github.com/estebanstifli/Meet2Notes

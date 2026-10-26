@@ -7,7 +7,9 @@
     "model": "मोडेल",
     "quit": "बाहिर निस्कनुहोस्",
     "cancel": "रद्द गर्नुहोस्",
-    "secureInputWarning": "⚠ Secure Input ले सर्टकटहरू रोकेको छ"
+    "secureInputWarning": "⚠ Secure Input ले सर्टकटहरू रोकेको छ",
+    "startMeeting": "Start Meeting",
+    "stopMeeting": "Stop Meeting"
   },
   "sidebar": {
     "general": "सामान्य",
@@ -16,7 +18,8 @@
     "postProcessing": "पोस्ट प्रोसेस",
     "history": "हिस्ट्री",
     "debug": "डिबग",
-    "about": "बारेमा"
+    "about": "बारेमा",
+    "meeting": "Meetings"
   },
   "onboarding": {
     "customModelDescription": "आधिकारिक रूपमा समर्थित छैन",
@@ -345,6 +348,10 @@
           "transcribe_with_post_process": {
             "name": "पोस्ट-प्रोसेसिङ हटकी",
             "description": "वैकल्पिक: तपाईंको ट्रान्सक्रिप्सनमा सधैँ AI पोस्ट-प्रोसेसिङ लागू गर्ने छुट्टै हटकी।"
+          },
+          "toggle_meeting": {
+            "name": "Meeting Shortcut",
+            "description": "Starts or stops a meeting transcript with speaker labels."
           }
         },
         "errors": {
@@ -876,6 +883,49 @@
           "details": "MeetScribe को स्थानीय स्पिच-टु-टेक्स्ट transcribe.cpp र ggml मा आधारित छ। Georgi Gerganov र योगदानकर्ताहरूको उत्कृष्ट कामका लागि धन्यवाद।"
         }
       }
+    },
+    "meeting": {
+      "title": "Meetings",
+      "open": {
+        "label": "Meeting window",
+        "description": "Open the live meeting transcript window.",
+        "button": "Open"
+      },
+      "maxSpeakers": {
+        "label": "Maximum speakers",
+        "description": "Upper bound on distinct speakers in a transcript (1–8). Accuracy drops above about four."
+      },
+      "latency": {
+        "label": "Speaker latency",
+        "description": "How much audio the diarizer waits for before labelling speakers. Longer is more accurate, shorter feels more live.",
+        "ultra_low": "0.3 s (fastest)",
+        "very_low": "0.6 s",
+        "low": "1 s (recommended)",
+        "high": "5 s (most stable)"
+      },
+      "outputDir": {
+        "label": "Output folder",
+        "description": "Where transcripts are saved. Empty uses Documents/MeetScribe.",
+        "placeholder": "Documents/MeetScribe"
+      },
+      "saveAudio": {
+        "label": "Save meeting audio",
+        "description": "Also keep a WAV recording next to the transcript. Off by default."
+      },
+      "writeJson": {
+        "label": "Word-level JSON",
+        "description": "Write a .json file with word timings and speakers next to the Markdown transcript."
+      },
+      "asrModel": {
+        "label": "Meeting transcription model",
+        "description": "Speech model used during meetings. Parakeet models give word-level timing (best speaker alignment); Whisper gives sentence-level timing.",
+        "same": "Same as dictation"
+      },
+      "backend": {
+        "label": "Diarizer",
+        "description": "Engine that detects who is speaking.",
+        "python_sidecar": "Nemotron 3 Diarization (Python prototype)"
+      }
     }
   },
   "footer": {
@@ -951,5 +1001,28 @@
     "learnMore": "यसलाई कसरी ठिक गर्ने",
     "recorderBlocked": "अहिले सर्टकट रेकर्ड गर्न सकिँदैन — macOS Secure Input ले कुञ्जी इभेन्टहरू रोकिरहेको छ। पहिले Secure Input चेतावनी समाधान गर्नुहोस्।",
     "dismiss": "हटाउनुहोस्"
+  },
+  "meeting": {
+    "title": "Meeting",
+    "start": "Start meeting",
+    "stop": "Stop meeting",
+    "starting": "Starting… loading models",
+    "stopping": "Finishing and saving…",
+    "idleHint": "Start a meeting to get a live transcript with speaker labels. Everything stays on this Mac.",
+    "waiting": "Listening… text appears a moment after each sentence.",
+    "speakers": "Speakers",
+    "noSpeakers": "No speakers yet",
+    "renameHint": "Click a name to rename that speaker everywhere",
+    "renamePlaceholder": "Name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "savedTo": "Transcript saved",
+    "reveal": "Show in folder",
+    "openFolder": "Open meetings folder",
+    "errorTitle": "Meeting problem",
+    "dismiss": "Dismiss",
+    "asrDelay": "Speech → text {{ms}} ms",
+    "diarizerLag": "speakers settle after {{ms}} ms",
+    "utterances": "{{count}} utterances"
   }
 }

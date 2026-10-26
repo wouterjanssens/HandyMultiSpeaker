@@ -7,7 +7,9 @@
     "model": "Model",
     "quit": "Afsluiten",
     "cancel": "Annuleren",
-    "secureInputWarning": "⚠ Sneltoetsen geblokkeerd door Secure Input"
+    "secureInputWarning": "⚠ Sneltoetsen geblokkeerd door Secure Input",
+    "startMeeting": "Vergadering starten",
+    "stopMeeting": "Vergadering stoppen"
   },
   "sidebar": {
     "general": "Algemeen",
@@ -16,7 +18,8 @@
     "postProcessing": "Naverwerking",
     "history": "Geschiedenis",
     "debug": "Probleemoplossing",
-    "about": "Over MeetScribe"
+    "about": "Over MeetScribe",
+    "meeting": "Vergaderingen"
   },
   "onboarding": {
     "customModelDescription": "Niet officieel ondersteund",
@@ -345,6 +348,10 @@
           "transcribe_with_post_process": {
             "name": "Sneltoets voor naverwerking",
             "description": "Optioneel: Een specifieke sneltoets die altijd AI-naverwerking toepast op je transcriptie."
+          },
+          "toggle_meeting": {
+            "name": "Sneltoets vergadering",
+            "description": "Start of stopt een vergadertranscript met sprekerlabels."
           }
         },
         "errors": {
@@ -876,6 +883,49 @@
           "details": "MeetScribe's lokale spraak-naar-tekst is gebouwd op transcribe.cpp en ggml. Met dank aan het geweldige werk van Georgi Gerganov en alle bijdragers."
         }
       }
+    },
+    "meeting": {
+      "title": "Vergaderingen",
+      "open": {
+        "label": "Vergadervenster",
+        "description": "Open het venster met het live transcript.",
+        "button": "Openen"
+      },
+      "maxSpeakers": {
+        "label": "Maximum aantal sprekers",
+        "description": "Bovengrens voor het aantal verschillende sprekers (1–8). Boven vier daalt de nauwkeurigheid."
+      },
+      "latency": {
+        "label": "Sprekervertraging",
+        "description": "Hoeveel audio de diarizer afwacht voor hij sprekers labelt. Langer is nauwkeuriger, korter voelt meer live.",
+        "ultra_low": "0,3 s (snelst)",
+        "very_low": "0,6 s",
+        "low": "1 s (aanbevolen)",
+        "high": "5 s (stabielst)"
+      },
+      "outputDir": {
+        "label": "Uitvoermap",
+        "description": "Waar transcripten worden bewaard. Leeg = Documenten/MeetScribe.",
+        "placeholder": "Documenten/MeetScribe"
+      },
+      "saveAudio": {
+        "label": "Audio bewaren",
+        "description": "Bewaar ook een WAV-opname naast het transcript. Standaard uit."
+      },
+      "writeJson": {
+        "label": "JSON per woord",
+        "description": "Schrijf een .json-bestand met woordtijden en sprekers naast het Markdown-transcript."
+      },
+      "asrModel": {
+        "label": "Transcriptiemodel voor vergaderingen",
+        "description": "Spraakmodel tijdens vergaderingen. Parakeet geeft tijden per woord (beste sprekertoewijzing); Whisper per zin.",
+        "same": "Zelfde als dicteren"
+      },
+      "backend": {
+        "label": "Diarizer",
+        "description": "Engine die bepaalt wie er spreekt.",
+        "python_sidecar": "Nemotron 3 Diarization (Python-prototype)"
+      }
     }
   },
   "footer": {
@@ -951,5 +1001,28 @@
     "learnMore": "Hoe je dit oplost",
     "recorderBlocked": "Sneltoetsen kunnen nu niet worden opgenomen — Secure Input van macOS blokkeert toetsgebeurtenissen. Los eerst de Secure Input-waarschuwing op.",
     "dismiss": "Sluiten"
+  },
+  "meeting": {
+    "title": "Vergadering",
+    "start": "Vergadering starten",
+    "stop": "Vergadering stoppen",
+    "starting": "Bezig met starten… modellen laden",
+    "stopping": "Afronden en opslaan…",
+    "idleHint": "Start een vergadering voor een live transcript met sprekerlabels. Alles blijft op deze Mac.",
+    "waiting": "Aan het luisteren… tekst verschijnt kort na elke zin.",
+    "speakers": "Sprekers",
+    "noSpeakers": "Nog geen sprekers",
+    "renameHint": "Klik op een naam om die spreker overal te hernoemen",
+    "renamePlaceholder": "Naam",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "savedTo": "Transcript opgeslagen",
+    "reveal": "Toon in map",
+    "openFolder": "Open map met vergaderingen",
+    "errorTitle": "Probleem met de vergadering",
+    "dismiss": "Sluiten",
+    "asrDelay": "Spraak → tekst {{ms}} ms",
+    "diarizerLag": "sprekers vast na {{ms}} ms",
+    "utterances": "{{count}} fragmenten"
   }
 }
