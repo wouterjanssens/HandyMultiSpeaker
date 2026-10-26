@@ -91,6 +91,9 @@ pub struct CaptureSink {
     /// counts; readiness is not speech.
     ready: Option<mpsc::Sender<()>>,
     samples: Vec<f32>,
+    // meetscribe: meeting mode streams frames out via `on_audio` and must not
+    // accumulate hours of audio here.
+    keep_samples: bool,
     heard_sound: bool,
 }
 
@@ -127,8 +130,14 @@ impl CaptureSink {
             on_audio,
             ready: Some(ready),
             samples: Vec::new(),
+            keep_samples: true,
             heard_sound: false,
         }
+    }
+
+    // meetscribe: frames still reach `on_audio`; `finish` returns no samples.
+    pub fn discard_samples(&mut self) {
+        self.keep_samples = false;
     }
 
     /// The detector, from a sink that never recorded (its start failed).
@@ -163,8 +172,10 @@ impl CaptureSink {
         }
     }
 
-    fn emit(samples: &mut Vec<f32>, on_audio: &AudioFrameCallback, frame: &[f32]) {
-        samples.extend_from_slice(frame);
+    fn emit(samples: &mut Vec<f32>, keep: bool, on_audio: &AudioFrameCallback, frame: &[f32]) {
+        if keep {
+            samples.extend_from_slice(frame);
+        }
         on_audio(frame);
     }
 }
@@ -185,7 +196,7 @@ impl Sink for CaptureSink {
         }
 
         if self.policy == VadPolicy::Disabled {
-            Self::emit(&mut self.samples, &self.on_audio, real);
+            Self::emit(&mut self.samples, self.keep_samples, &self.on_audio, real);
             return;
         }
 
@@ -197,7 +208,9 @@ impl Sink for CaptureSink {
             .push_frame(chunk.samples)
             .unwrap_or(VadFrame::Speech(chunk.samples))
         {
-            VadFrame::Speech(frame) => Self::emit(&mut self.samples, &self.on_audio, frame),
+            VadFrame::Speech(frame) => {
+                Self::emit(&mut self.samples, self.keep_samples, &self.on_audio, frame)
+            }
             VadFrame::Noise => {}
         }
     }

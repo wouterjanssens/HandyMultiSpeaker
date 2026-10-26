@@ -977,8 +977,24 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
         "test".to_string(),
         Arc::new(TestAction) as Arc<dyn ShortcutAction>,
     );
+    // meetscribe: meeting mode
+    map.insert(
+        crate::meeting::MEETING_BINDING.to_string(),
+        Arc::new(MeetingAction) as Arc<dyn ShortcutAction>,
+    );
     map
 });
+
+// meetscribe: toggles on press; release does nothing (meetings aren't push-to-talk).
+struct MeetingAction;
+
+impl ShortcutAction for MeetingAction {
+    fn start(&self, app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {
+        crate::meeting::toggle(app);
+    }
+
+    fn stop(&self, _app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {}
+}
 
 #[cfg(test)]
 mod tests {

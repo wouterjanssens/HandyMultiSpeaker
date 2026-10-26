@@ -16,6 +16,11 @@ use std::thread;
 /// Send a transcription input to the coordinator.
 /// Used by signal handlers, CLI flags, and any other external trigger.
 pub fn send_transcription_input(app: &AppHandle, binding_id: &str, source: &str) {
+    // meetscribe: a meeting holds the microphone
+    if crate::meeting::is_active(app) {
+        warn!("Ignoring {binding_id} from {source} during a meeting");
+        return;
+    }
     if let Some(c) = app.try_state::<TranscriptionCoordinator>() {
         c.send_external_input(binding_id, source);
     } else {

@@ -957,6 +957,21 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: default_post_process_shortcut.to_string(),
         },
     );
+    // meetscribe: meeting mode toggle
+    #[cfg(target_os = "macos")]
+    let default_meeting_shortcut = "option+shift+m";
+    #[cfg(not(target_os = "macos"))]
+    let default_meeting_shortcut = "ctrl+shift+m";
+    bindings.insert(
+        "toggle_meeting".to_string(),
+        ShortcutBinding {
+            id: "toggle_meeting".to_string(),
+            name: "Start/Stop Meeting".to_string(),
+            description: "Starts or stops a speaker-attributed meeting transcript.".to_string(),
+            default_binding: default_meeting_shortcut.to_string(),
+            current_binding: default_meeting_shortcut.to_string(),
+        },
+    );
     bindings.insert(
         "cancel".to_string(),
         ShortcutBinding {

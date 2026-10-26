@@ -14,6 +14,7 @@ mod helpers;
 mod input;
 mod llm_client;
 mod managers;
+mod meeting; // meetscribe
 mod memory;
 mod overlay;
 mod paste_tx;
@@ -213,6 +214,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     app_handle.manage(recording_manager.clone());
     app_handle.manage(model_manager.clone());
     app_handle.manage(transcription_manager.clone());
+    app_handle.manage(Arc::new(meeting::MeetingManager::new())); // meetscribe
     app_handle.manage(history_manager.clone());
     app_handle.manage(tray::TrayState::new());
     app_handle.manage(TranscriptionJobManager::new(app_handle));
@@ -286,6 +288,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
             "settings" => {
                 show_main_window(app);
             }
+            "toggle_meeting" => meeting::toggle(app), // meetscribe
             "secure_input_warning" => {
                 // Full explanation lives in the settings-window banner
                 show_main_window(app);
@@ -779,6 +782,15 @@ pub fn run(cli_args: CliArgs) {
             commands::history::update_history_limit,
             commands::history::update_recording_retention_period,
             helpers::clamshell::is_laptop,
+            // meetscribe: meeting mode
+            meeting::meeting_toggle,
+            meeting::meeting_open_window,
+            meeting::meeting_status,
+            meeting::meeting_turns,
+            meeting::meeting_rename_speaker,
+            meeting::meeting_reveal_output,
+            meeting::settings::get_meeting_settings,
+            meeting::settings::set_meeting_settings,
         ])
         .events(collect_events![
             managers::history::HistoryUpdatePayload,
@@ -874,6 +886,8 @@ pub fn run(cli_args: CliArgs) {
                 signal_handle::send_transcription_input(app, "transcribe_with_post_process", "CLI");
             } else if args.iter().any(|a| a == "--cancel") {
                 crate::utils::cancel_current_operation(app);
+            } else if args.iter().any(|a| a == "--toggle-meeting") {
+                meeting::toggle(app); // meetscribe
             } else {
                 // A second process was launched without remote-control flags
                 // (e.g. the binary run from a shell). On macOS, relaunching the

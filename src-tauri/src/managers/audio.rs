@@ -1006,6 +1006,27 @@ impl AudioRecordingManager {
         binding_id: &str,
         vad_policy: VadPolicy,
     ) -> Result<RecordingReadiness, anyhow::Error> {
+        self.start_recording_with_tap(binding_id, vad_policy, None) // meetscribe: see below
+    }
+
+    // meetscribe: meeting mode takes the microphone with VAD off and receives
+    // every 16 kHz frame through `tap` instead of the live-dictation router;
+    // nothing is accumulated in the sink. Stop it with
+    // `stop_recording(binding_id, …)` like any recording.
+    pub fn start_meeting_capture(
+        &self,
+        binding_id: &str,
+        tap: AudioFrameCallback,
+    ) -> Result<RecordingReadiness, anyhow::Error> {
+        self.start_recording_with_tap(binding_id, VadPolicy::Disabled, Some(tap))
+    }
+
+    fn start_recording_with_tap(
+        &self,
+        binding_id: &str,
+        vad_policy: VadPolicy,
+        tap: Option<AudioFrameCallback>,
+    ) -> Result<RecordingReadiness, anyhow::Error> {
         let mut state = self.state.lock().unwrap();
         if !matches!(*state, RecordingState::Idle) {
             return Err(anyhow::anyhow!("Already recording"));
@@ -1029,13 +1050,16 @@ impl AudioRecordingManager {
             }
 
             let (ready_tx, receiver) = mpsc::channel();
-            let sink = CaptureSink::new(
+            let mut sink = CaptureSink::new(
                 self.lend_vad()?,
                 vad_policy,
                 Arc::clone(&self.on_levels),
-                Arc::clone(&self.on_audio),
+                tap.clone().unwrap_or_else(|| Arc::clone(&self.on_audio)),
                 ready_tx,
             );
+            if tap.is_some() {
+                sink.discard_samples();
+            }
 
             let recorder = self.recorder.lock().unwrap();
             let Some(microphone) = recorder.as_ref() else {

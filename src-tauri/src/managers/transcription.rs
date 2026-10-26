@@ -987,6 +987,17 @@ impl TranscriptionManager {
         Ok(final_result)
     }
 
+    // meetscribe: meeting mode needs the timed transcript (words/segments
+    // with ms offsets relative to `audio`), not just text. One batch run of the
+    // loaded model, no chunking or text post-processing.
+    pub fn transcribe_timed(&self, audio: Vec<f32>) -> Result<Transcript> {
+        let mark = self.engine.cancel_mark();
+        self.touch_activity();
+        let batch = self.batch_context()?;
+        self.run_batch(mark, audio, &batch.setup.run_options, &batch.active_model)
+            .map_err(engine_error)
+    }
+
     /// Decode a whole clip with the loaded model, loading it first if a load
     /// is under way.
     fn decode_batch(&self, audio: Vec<f32>) -> Result<RunOutcome> {

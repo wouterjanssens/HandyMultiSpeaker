@@ -91,7 +91,7 @@ impl TurnBuilder {
     }
 
     /// All turns, locked first.
-    pub fn turns(&self) -> impl Iterator<Item = &Turn> {
+    pub fn turns(&self) -> impl Iterator<Item = &Turn> + Clone {
         self.locked.iter().chain(self.emitted_open.iter())
     }
 

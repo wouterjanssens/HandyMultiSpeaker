@@ -25,6 +25,11 @@ pub struct CliArgs {
     #[arg(long)]
     pub cancel: bool,
 
+    // meetscribe: meeting mode
+    /// Start or stop a meeting recording (sent to running instance)
+    #[arg(long)]
+    pub toggle_meeting: bool,
+
     /// Enable debug mode with verbose logging
     #[arg(long)]
     pub debug: bool,
