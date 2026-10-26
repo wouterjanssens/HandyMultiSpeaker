@@ -277,9 +277,8 @@ const MeetingWindow: React.FC = () => {
           {status.phase === "stopping" && t("meeting.stopping")}
         </span>
         <div className="ml-auto flex items-center gap-2">
-          <div title={t("meeting.languageHint")}>
+          <div className="shrink-0" title={t("meeting.languageHint")}>
             <Dropdown
-              className="w-36"
               selectedValue={language}
               options={LANGUAGES.map((l) => ({
                 value: l.value,
