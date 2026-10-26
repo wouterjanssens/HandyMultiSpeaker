@@ -5,6 +5,7 @@
 //! holds. Pure logic lives in the `meeting-core` crate; this module wires it to audio capture,
 //! the ASR engine, a diarizer backend, the meeting window and the output files.
 
+pub mod model;
 pub mod session;
 pub mod settings;
 pub mod sidecar;
@@ -142,9 +143,7 @@ impl MeetingStatus {
     }
 
     pub(crate) fn running(s: &Shared) -> Self {
-        let mut ids: Vec<u8> = s.turns.turns().filter_map(|t| t.speaker).collect();
-        ids.sort_unstable();
-        ids.dedup();
+        let ids: Vec<u8> = s.speakers.seen().to_vec();
         Self {
             phase: MeetingPhase::Running,
             started_epoch_ms: Some(s.started_epoch_ms as f64),
@@ -179,13 +178,26 @@ fn set_phase(app: &AppHandle, m: &MeetingManager, state: State) {
     crate::tray::update_tray_menu(app);
 }
 
-fn create_diarizer(settings: &MeetingSettings) -> anyhow::Result<Box<dyn StreamingDiarizer>> {
-    match settings.diarizer_backend {
-        DiarizerBackend::PythonSidecar => Ok(Box::new(sidecar::PythonSidecarDiarizer::spawn(
-            settings.latency_profile.sidecar_name(),
+fn create_diarizer(
+    app: &AppHandle,
+    settings: &MeetingSettings,
+) -> anyhow::Result<Box<dyn StreamingDiarizer>> {
+    let profile = settings.latency_profile.sidecar_name();
+    let native = match settings.diarizer_backend {
+        DiarizerBackend::Auto => diarize::AVAILABLE,
+        DiarizerBackend::Native => true,
+        DiarizerBackend::PythonSidecar => false,
+    };
+    if native {
+        let path = model::ensure_diarizer_model(app)?;
+        let cfg = diarize::NativeConfig::for_profile(profile);
+        Ok(Box::new(diarize::NativeDiarizer::new(&path, &cfg)?))
+    } else {
+        Ok(Box::new(sidecar::PythonSidecarDiarizer::spawn(
+            profile,
             "auto",
             Duration::from_secs(300),
-        )?)),
+        )?))
     }
 }
 
@@ -215,7 +227,8 @@ fn start(app: &AppHandle, m: Arc<MeetingManager>) {
     let app = app.clone();
     std::thread::spawn(move || {
         let settings = settings::load(&app);
-        let result = create_diarizer(&settings).and_then(|d| Session::start(&app, settings, d));
+        let result =
+            create_diarizer(&app, &settings).and_then(|d| Session::start(&app, settings, d));
         match result {
             Ok(session) => {
                 log::info!("Meeting started");

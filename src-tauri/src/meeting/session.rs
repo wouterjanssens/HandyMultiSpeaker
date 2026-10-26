@@ -84,7 +84,15 @@ pub struct MeetingOutput {
     pub error: Option<String>,
 }
 
-fn emit_turn_events(app: &AppHandle, shared: &Shared, events: Vec<TurnEvent>) {
+fn emit_turn_events(app: &AppHandle, shared: &mut Shared, events: Vec<TurnEvent>) {
+    // display numbers follow first appearance in the transcript (see SpeakerMap)
+    for ev in &events {
+        if let TurnEvent::Appended { turn } | TurnEvent::Updated { turn } = ev {
+            if let Some(speaker) = turn.speaker {
+                shared.speakers.observe(speaker);
+            }
+        }
+    }
     for ev in events {
         let (name, payload) = match ev {
             TurnEvent::Appended { turn } => (
@@ -242,7 +250,7 @@ impl Session {
             } = &mut *shared;
             turns.finish(activity)
         };
-        emit_turn_events(app, &shared, events);
+        emit_turn_events(app, &mut shared, events);
         let mut delays = shared.asr_delays_ms.clone();
         delays.sort_unstable();
         let pct = |p: f64| {
@@ -400,7 +408,7 @@ fn apply_update(app: &AppHandle, shared: &Arc<Mutex<Shared>>, update: DiarUpdate
         turns.refresh(activity)
     };
     if !events.is_empty() {
-        emit_turn_events(app, &s, events);
+        emit_turn_events(app, &mut s, events);
     }
 }
 
@@ -562,7 +570,7 @@ fn transcribe_utterance(
         } = &mut *s;
         turns.refresh(activity)
     };
-    emit_turn_events(app, &s, events);
+    emit_turn_events(app, &mut s, events);
 }
 
 /// Converts one utterance's transcript to meeting-timeline words: word rows when the engine has

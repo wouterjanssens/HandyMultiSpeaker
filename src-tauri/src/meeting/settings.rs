@@ -38,6 +38,10 @@ impl LatencyProfile {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "snake_case")]
 pub enum DiarizerBackend {
+    /// Native when this build linked NeMo-Speech.cpp, otherwise the Python sidecar.
+    Auto,
+    /// NeMo-Speech.cpp in-process (ggml/Metal).
+    Native,
     /// Temporary: Hugging Face reference implementation in a Python process (dev builds only).
     PythonSidecar,
 }
@@ -67,7 +71,7 @@ impl Default for MeetingSettings {
             save_audio: false,
             asr_model: None,
             write_json: true,
-            diarizer_backend: DiarizerBackend::PythonSidecar,
+            diarizer_backend: DiarizerBackend::Auto,
         }
     }
 }
@@ -166,5 +170,6 @@ mod tests {
         assert_eq!(s.max_speakers, 3);
         assert_eq!(s.latency_profile, LatencyProfile::Low);
         assert!(!s.save_audio);
+        assert_eq!(s.diarizer_backend, DiarizerBackend::Auto);
     }
 }

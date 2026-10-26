@@ -185,6 +185,9 @@ mod tests {
     #[test]
     fn markdown_matches_spec_format() {
         let mut speakers = SpeakerMap::new();
+        for id in [0, 1, 2] {
+            speakers.observe(id);
+        }
         speakers.rename(0, "Jan");
         speakers.rename(2, "Wouter");
         let turns = [

@@ -1341,6 +1341,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "diarize"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "hound",
+ "meeting-core",
+]
+
+[[package]]
 name = "digest"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2465,6 +2474,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "clap",
+ "diarize",
  "earshot",
  "enigo",
  "env_filter",

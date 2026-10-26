@@ -1,8 +1,10 @@
 //! Display identities for diarizer speakers.
 //!
-//! The diarizer numbers speakers by first arrival (0, 1, …), which is already a stable order for
-//! a single meeting. They are shown as "Speaker N" (N = index + 1) until the user names them;
-//! a rename applies retroactively because turns store the index, not the label.
+//! The diarizer numbers speakers by first *acoustic* arrival (0, 1, …). The first voice it hears
+//! may never produce transcribed words (a cough, a short "yes" the ASR drops), so display numbers
+//! follow first appearance in the transcript instead: whoever is attributed words first is
+//! "Speaker 1". Callers [`SpeakerMap::observe`] each speaker as its words reach the transcript.
+//! A rename applies retroactively because turns store the diarizer index, not the label.
 
 use std::collections::BTreeMap;
 
@@ -50,11 +52,16 @@ impl SpeakerMap {
     /// Label for display and export.
     pub fn label(&self, speaker: Option<u8>) -> String {
         match speaker {
-            Some(s) => self
-                .names
-                .get(&s)
-                .cloned()
-                .unwrap_or_else(|| format!("Speaker {}", s as u32 + 1)),
+            Some(s) => self.names.get(&s).cloned().unwrap_or_else(|| {
+                // unobserved speakers (shouldn't be displayed) fall back to their raw index
+                let n = self
+                    .seen
+                    .iter()
+                    .position(|&x| x == s)
+                    .map_or(s as usize, |pos| pos)
+                    + 1;
+                format!("Speaker {n}")
+            }),
             None => "Unknown".to_string(),
         }
     }
@@ -79,6 +86,17 @@ mod tests {
         assert_eq!(m.label(Some(1)), "Jan");
         m.rename(1, "");
         assert_eq!(m.label(Some(1)), "Speaker 2");
+    }
+
+    #[test]
+    fn display_numbers_follow_first_appearance() {
+        let mut m = SpeakerMap::new();
+        m.observe(2);
+        m.observe(0);
+        assert_eq!(m.label(Some(2)), "Speaker 1");
+        assert_eq!(m.label(Some(0)), "Speaker 2");
+        m.rename(0, "Jan");
+        assert_eq!(m.label(Some(0)), "Jan");
     }
 
     #[test]

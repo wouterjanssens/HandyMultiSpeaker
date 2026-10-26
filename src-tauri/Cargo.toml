@@ -91,6 +91,7 @@ tauri-specta = { version = "=2.0.0-rc.21", features = ["derive", "typescript"] }
 tauri-plugin-dialog = "2.6"
 # meetscribe: meeting-mode core (alignment, live turns, export)
 meeting-core = { path = "crates/meeting-core" }
+diarize = { path = "crates/diarize" }
 hf-hub = { git = "https://github.com/cjpais/hf-hub", branch = "cancellable-downloads", features = [
   "tokio",
 ] }
