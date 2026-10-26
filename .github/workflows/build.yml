@@ -32,6 +32,19 @@ on:
         required: false
         type: boolean
         default: false
+      # Sign the updater bundles (.app.tar.gz + .sig, latest.json) with the
+      # TAURI_SIGNING_PRIVATE_KEY secret. Independent of sign-binaries so a
+      # release can ship self-update without Apple/Azure code-signing.
+      sign-updater:
+        required: false
+        type: boolean
+        default: false
+      # When set, stamped into tauri.conf.json before building, so a release
+      # tag (e.g. v1.2.0) decides the app version.
+      version:
+        required: false
+        type: string
+        default: ""
       repository:
         required: false
         type: string
@@ -77,6 +90,13 @@ jobs:
           repository: ${{ inputs.repository }}
           ref: ${{ inputs.ref }}
           fetch-depth: 0
+
+      - name: Stamp version into tauri.conf.json
+        if: inputs.version != ''
+        shell: bash
+        run: |
+          perl -pi -e 's/"version": "[^"]*"/"version": "${{ inputs.version }}"/ if $. < 10' src-tauri/tauri.conf.json
+          grep -m1 '"version"' src-tauri/tauri.conf.json
 
       - name: Get version from tauri.conf.json
         id: get-version
@@ -460,8 +480,8 @@ jobs:
           AZURE_CLIENT_ID: ${{ inputs.sign-binaries && secrets.AZURE_CLIENT_ID || '' }}
           AZURE_CLIENT_SECRET: ${{ inputs.sign-binaries && secrets.AZURE_CLIENT_SECRET || '' }}
           AZURE_TENANT_ID: ${{ inputs.sign-binaries && secrets.AZURE_TENANT_ID || '' }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ inputs.sign-binaries && secrets.TAURI_SIGNING_PRIVATE_KEY || '' }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ inputs.sign-binaries && secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ (inputs.sign-binaries || inputs.sign-updater) && secrets.TAURI_SIGNING_PRIVATE_KEY || '' }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ (inputs.sign-binaries || inputs.sign-updater) && secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
           # The Vulkan loader and Wayland client library must come from the host
           # graphics stack. Bundling Ubuntu's copies ahead of the system libraries can
           # prevent a newer distro's Vulkan ICD or Mesa stack from loading.

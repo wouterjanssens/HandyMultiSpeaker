@@ -943,7 +943,11 @@
     "portableUpdateMessage": "התקנות ניידות אינן מתעדכנות אוטומטית. הורד למטה את המתקין המתאים למערכת שלך, הפעל אותו והתקן לאותה תיקייה — תיקיית Data/ (הגדרות, מודלים, הקלטות) נשמרת במקומה.",
     "portableUpdateButton": "הורדת המתקין",
     "portableUpdateBrowseMessage": "התקנות ניידות אינן מתעדכנות אוטומטית. הורד את הגרסה האחרונה המתאימה למערכת שלך מ-GitHub Releases והתקן אותה לאותה תיקייה — תיקיית Data/ (הגדרות, מודלים, הקלטות) נשמרת במקומה.",
-    "portableUpdateBrowseButton": "פתח את GitHub Releases"
+    "portableUpdateBrowseButton": "פתח את GitHub Releases",
+    "updatePromptTitle": "יש עדכון זמין",
+    "updatePromptMessage": "MeetScribe {{version}} זמין (הגרסה שלך {{currentVersion}}). לעדכן עכשיו? MeetScribe יופעל מחדש לאחר התקנת העדכון.",
+    "updatePromptInstall": "עדכן עכשיו",
+    "updatePromptSkip": "דלג עד ההפעלה הבאה"
   },
   "whatsNew": {
     "title": "חדש ב-MeetScribe v{{version}}"

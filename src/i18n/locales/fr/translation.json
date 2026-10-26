@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Les installations portables ne peuvent pas être mises à jour automatiquement. Téléchargez ci-dessous l’installateur correspondant à votre système, exécutez-le et installez-le dans le même dossier : votre dossier Data/ (paramètres, modèles, enregistrements) est conservé.",
     "portableUpdateButton": "Télécharger l’installateur",
     "portableUpdateBrowseMessage": "Les installations portables ne peuvent pas être mises à jour automatiquement. Téléchargez la dernière version correspondant à votre système depuis GitHub Releases et installez-la dans le même dossier : votre dossier Data/ (paramètres, modèles, enregistrements) est conservé.",
-    "portableUpdateBrowseButton": "Ouvrir GitHub Releases"
+    "portableUpdateBrowseButton": "Ouvrir GitHub Releases",
+    "updatePromptTitle": "Mise à jour disponible",
+    "updatePromptMessage": "MeetScribe {{version}} est disponible (vous avez {{currentVersion}}). Mettre à jour maintenant ? MeetScribe redémarre une fois la mise à jour installée.",
+    "updatePromptInstall": "Mettre à jour",
+    "updatePromptSkip": "Ignorer jusqu'au prochain redémarrage"
   },
   "whatsNew": {
     "title": "Nouveautés de MeetScribe v{{version}}"

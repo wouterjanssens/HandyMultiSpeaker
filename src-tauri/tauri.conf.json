@@ -78,8 +78,10 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "",
-      "endpoints": []
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM5Q0EzN0EyMEVCMzI3NwpSV1IzTXVzZ2VxT2NBemVYREdmVnAzWU8vam5zQmttam54N054cldaVDlDN2JvQXFFckJUYXJadAo=",
+      "endpoints": [
+        "https://github.com/wouterjanssens/HandyMultiSpeaker/releases/latest/download/latest.json"
+      ]
     }
   }
 }

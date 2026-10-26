@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Портативные установки нельзя обновить автоматически. Скачайте ниже установщик для вашей системы, запустите его и установите в ту же папку — папка Data/ (настройки, модели, записи) останется на месте.",
     "portableUpdateButton": "Скачать установщик",
     "portableUpdateBrowseMessage": "Портативные установки нельзя обновить автоматически. Скачайте последнюю версию для вашей системы со страницы GitHub Releases и установите её в ту же папку — папка Data/ (настройки, модели, записи) останется на месте.",
-    "portableUpdateBrowseButton": "Открыть GitHub Releases"
+    "portableUpdateBrowseButton": "Открыть GitHub Releases",
+    "updatePromptTitle": "Доступно обновление",
+    "updatePromptMessage": "Доступна версия MeetScribe {{version}} (у вас {{currentVersion}}). Обновить сейчас? После установки MeetScribe перезапустится.",
+    "updatePromptInstall": "Обновить сейчас",
+    "updatePromptSkip": "Пропустить до следующего запуска"
   },
   "whatsNew": {
     "title": "Новое в MeetScribe v{{version}}"

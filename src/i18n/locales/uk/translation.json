@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Портативні встановлення не можна оновити автоматично. Завантажте нижче інсталятор для вашої системи, запустіть його та встановіть у ту саму теку — ваша тека Data/ (налаштування, моделі, записи) залишиться на місці.",
     "portableUpdateButton": "Завантажити інсталятор",
     "portableUpdateBrowseMessage": "Портативні встановлення не можна оновити автоматично. Завантажте найновішу версію для вашої системи зі сторінки GitHub Releases та встановіть її в ту саму теку — ваша тека Data/ (налаштування, моделі, записи) залишиться на місці.",
-    "portableUpdateBrowseButton": "Відкрити GitHub Releases"
+    "portableUpdateBrowseButton": "Відкрити GitHub Releases",
+    "updatePromptTitle": "Доступне оновлення",
+    "updatePromptMessage": "Доступна версія MeetScribe {{version}} (у вас {{currentVersion}}). Оновити зараз? Після встановлення MeetScribe перезапуститься.",
+    "updatePromptInstall": "Оновити зараз",
+    "updatePromptSkip": "Пропустити до наступного запуску"
   },
   "whatsNew": {
     "title": "Нове в MeetScribe v{{version}}"
