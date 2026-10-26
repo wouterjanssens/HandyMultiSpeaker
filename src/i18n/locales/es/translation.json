@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Las instalaciones portátiles no se pueden actualizar automáticamente. Descarga abajo el instalador para tu sistema, ejecútalo e instálalo en la misma carpeta: tu carpeta Data/ (ajustes, modelos, grabaciones) se conserva.",
     "portableUpdateButton": "Descargar instalador",
     "portableUpdateBrowseMessage": "Las instalaciones portátiles no se pueden actualizar automáticamente. Descarga la versión más reciente para tu sistema desde GitHub Releases e instálala en la misma carpeta: tu carpeta Data/ (ajustes, modelos, grabaciones) se conserva.",
-    "portableUpdateBrowseButton": "Abrir GitHub Releases"
+    "portableUpdateBrowseButton": "Abrir GitHub Releases",
+    "updatePromptTitle": "Actualización disponible",
+    "updatePromptMessage": "MeetScribe {{version}} está disponible (tienes {{currentVersion}}). ¿Actualizar ahora? MeetScribe se reiniciará al instalar la actualización.",
+    "updatePromptInstall": "Actualizar ahora",
+    "updatePromptSkip": "Omitir hasta el próximo reinicio"
   },
   "whatsNew": {
     "title": "Nuevo en MeetScribe v{{version}}"

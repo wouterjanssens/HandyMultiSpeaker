@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Instalacji przenośnych nie można aktualizować automatycznie. Pobierz poniżej instalator dla swojego systemu, uruchom go i zainstaluj w tym samym folderze — Twój folder Data/ (ustawienia, modele, nagrania) pozostaje na miejscu.",
     "portableUpdateButton": "Pobierz instalator",
     "portableUpdateBrowseMessage": "Instalacji przenośnych nie można aktualizować automatycznie. Pobierz najnowszą wersję dla swojego systemu z GitHub Releases i zainstaluj ją w tym samym folderze — Twój folder Data/ (ustawienia, modele, nagrania) pozostaje na miejscu.",
-    "portableUpdateBrowseButton": "Otwórz GitHub Releases"
+    "portableUpdateBrowseButton": "Otwórz GitHub Releases",
+    "updatePromptTitle": "Dostępna aktualizacja",
+    "updatePromptMessage": "Dostępny jest MeetScribe {{version}} (masz {{currentVersion}}). Zaktualizować teraz? MeetScribe uruchomi się ponownie po instalacji.",
+    "updatePromptInstall": "Aktualizuj teraz",
+    "updatePromptSkip": "Pomiń do następnego uruchomienia"
   },
   "whatsNew": {
     "title": "Nowości w MeetScribe v{{version}}"

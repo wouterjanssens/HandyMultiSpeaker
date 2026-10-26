@@ -943,7 +943,11 @@
     "portableUpdateMessage": "لا يمكن تحديث التثبيتات المحمولة تلقائيًا. نزّل المثبّت المناسب لنظامك من الزر أدناه، شغّله، وثبّته في المجلد نفسه — يبقى مجلد Data/ (الإعدادات والنماذج والتسجيلات) في مكانه.",
     "portableUpdateButton": "تنزيل المثبّت",
     "portableUpdateBrowseMessage": "لا يمكن تحديث التثبيتات المحمولة تلقائيًا. نزّل أحدث إصدار مناسب لنظامك من GitHub Releases وثبّته في المجلد نفسه — يبقى مجلد Data/ (الإعدادات والنماذج والتسجيلات) في مكانه.",
-    "portableUpdateBrowseButton": "فتح GitHub Releases"
+    "portableUpdateBrowseButton": "فتح GitHub Releases",
+    "updatePromptTitle": "يتوفر تحديث",
+    "updatePromptMessage": "يتوفر MeetScribe {{version}} (لديك {{currentVersion}}). هل تريد التحديث الآن؟ سيُعاد تشغيل MeetScribe بعد تثبيت التحديث.",
+    "updatePromptInstall": "تحديث الآن",
+    "updatePromptSkip": "تخطي حتى إعادة التشغيل التالية"
   },
   "whatsNew": {
     "title": "الجديد في MeetScribe v{{version}}"

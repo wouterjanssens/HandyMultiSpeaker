@@ -943,7 +943,11 @@
     "portableUpdateMessage": "便携版无法自动更新。请通过下方按钮下载适用于你的系统的安装程序，运行后安装到同一文件夹，你的 Data/ 文件夹（设置、模型、录音）会保留在原处。",
     "portableUpdateButton": "下载安装程序",
     "portableUpdateBrowseMessage": "便携版无法自动更新。请从 GitHub Releases 下载适用于你的系统的最新版本，并安装到同一文件夹，你的 Data/ 文件夹（设置、模型、录音）会保留在原处。",
-    "portableUpdateBrowseButton": "打开 GitHub Releases"
+    "portableUpdateBrowseButton": "打开 GitHub Releases",
+    "updatePromptTitle": "有可用更新",
+    "updatePromptMessage": "MeetScribe {{version}} 已发布（当前版本 {{currentVersion}}）。立即更新？安装完成后 MeetScribe 将重新启动。",
+    "updatePromptInstall": "立即更新",
+    "updatePromptSkip": "跳过，下次启动再说"
   },
   "whatsNew": {
     "title": "MeetScribe v{{version}} 新功能"

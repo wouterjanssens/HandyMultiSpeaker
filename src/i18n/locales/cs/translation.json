@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Přenosné instalace nelze aktualizovat automaticky. Níže stáhněte instalátor pro svůj systém, spusťte jej a nainstalujte do stejné složky — vaše složka Data/ (nastavení, modely, nahrávky) zůstane na místě.",
     "portableUpdateButton": "Stáhnout instalátor",
     "portableUpdateBrowseMessage": "Přenosné instalace nelze aktualizovat automaticky. Stáhněte nejnovější verzi pro svůj systém z GitHub Releases a nainstalujte ji do stejné složky — vaše složka Data/ (nastavení, modely, nahrávky) zůstane na místě.",
-    "portableUpdateBrowseButton": "Otevřít GitHub Releases"
+    "portableUpdateBrowseButton": "Otevřít GitHub Releases",
+    "updatePromptTitle": "K dispozici je aktualizace",
+    "updatePromptMessage": "MeetScribe {{version}} je k dispozici (máte {{currentVersion}}). Aktualizovat nyní? Po instalaci se MeetScribe restartuje.",
+    "updatePromptInstall": "Aktualizovat nyní",
+    "updatePromptSkip": "Přeskočit do příštího spuštění"
   },
   "whatsNew": {
     "title": "Novinky v MeetScribe v{{version}}"

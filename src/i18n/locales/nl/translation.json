@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Draagbare (portable) installaties kunnen niet automatisch worden bijgewerkt. Download hieronder het installatiebestand voor je systeem, voer het uit en installeer in dezelfde map — je Data/-map (instellingen, modellen, opnames) blijft behouden.",
     "portableUpdateButton": "Installatiebestand downloaden",
     "portableUpdateBrowseMessage": "Draagbare (portable) installaties kunnen niet automatisch worden bijgewerkt. Download de nieuwste versie voor je systeem van GitHub Releases en installeer die in dezelfde map — je Data/-map (instellingen, modellen, opnames) blijft behouden.",
-    "portableUpdateBrowseButton": "GitHub Releases openen"
+    "portableUpdateBrowseButton": "GitHub Releases openen",
+    "updatePromptTitle": "Update beschikbaar",
+    "updatePromptMessage": "MeetScribe {{version}} is beschikbaar (je hebt {{currentVersion}}). Nu bijwerken? MeetScribe herstart zodra de update geïnstalleerd is.",
+    "updatePromptInstall": "Nu bijwerken",
+    "updatePromptSkip": "Overslaan tot volgende herstart"
   },
   "whatsNew": {
     "title": "Nieuw in MeetScribe v{{version}}"

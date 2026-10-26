@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Les instal·lacions portables no es poden actualitzar automàticament. Baixa l'instal·lador per al vostre sistema a continuació, executeu-lo i instal·leu-lo a la mateixa carpeta. La carpeta Data/ (configuració, models i enregistraments) es conserva.",
     "portableUpdateButton": "Baixa l'instal·lador",
     "portableUpdateBrowseMessage": "Les instal·lacions portables no es poden actualitzar automàticament. Baixa l'última versió per al vostre sistema des de GitHub Releases i instal·leu-la a la mateixa carpeta. La carpeta Data/ (configuració, models i enregistraments) es conserva.",
-    "portableUpdateBrowseButton": "Obriu GitHub Releases"
+    "portableUpdateBrowseButton": "Obriu GitHub Releases",
+    "updatePromptTitle": "Actualització disponible",
+    "updatePromptMessage": "MeetScribe {{version}} està disponible (tens {{currentVersion}}). Vols actualitzar ara? MeetScribe es reiniciarà en instal·lar l'actualització.",
+    "updatePromptInstall": "Actualitza ara",
+    "updatePromptSkip": "Omet fins al proper reinici"
   },
   "whatsNew": {
     "title": "Novetats del MeetScribe v{{version}}"

@@ -943,7 +943,11 @@
     "portableUpdateMessage": "पोर्टेबल इन्स्टलहरू स्वतः अपडेट गर्न सकिँदैन। तलबाट आफ्नो प्रणालीका लागि इन्स्टलर डाउनलोड गर्नुहोस्, चलाउनुहोस् र उही फोल्डरमा इन्स्टल गर्नुहोस् — तपाईंको Data/ फोल्डर (सेटिङ, मोडेल, रेकर्डिङ) जस्ताको तस्तै रहन्छ।",
     "portableUpdateButton": "इन्स्टलर डाउनलोड गर्नुहोस्",
     "portableUpdateBrowseMessage": "पोर्टेबल इन्स्टलहरू स्वतः अपडेट गर्न सकिँदैन। GitHub Releases बाट आफ्नो प्रणालीका लागि पछिल्लो संस्करण डाउनलोड गर्नुहोस् र उही फोल्डरमा इन्स्टल गर्नुहोस् — तपाईंको Data/ फोल्डर (सेटिङ, मोडेल, रेकर्डिङ) जस्ताको तस्तै रहन्छ।",
-    "portableUpdateBrowseButton": "GitHub Releases खोल्नुहोस्"
+    "portableUpdateBrowseButton": "GitHub Releases खोल्नुहोस्",
+    "updatePromptTitle": "अपडेट उपलब्ध छ",
+    "updatePromptMessage": "MeetScribe {{version}} उपलब्ध छ (तपाईंसँग {{currentVersion}} छ)। अहिले अपडेट गर्ने? अपडेट इन्स्टल भएपछि MeetScribe पुनः सुरु हुन्छ।",
+    "updatePromptInstall": "अहिले अपडेट गर्नुहोस्",
+    "updatePromptSkip": "अर्को पुनः सुरुसम्म छोड्नुहोस्"
   },
   "whatsNew": {
     "title": "MeetScribe v{{version}} मा नयाँ"

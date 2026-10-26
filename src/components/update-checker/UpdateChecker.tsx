@@ -30,6 +30,12 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
   const [portableInstallerUrl, setPortableInstallerUrl] = useState<string>(
     PORTABLE_RELEASES_URL,
   );
+  // The startup check asks once per launch; "skip" hides the prompt until the
+  // next restart, while the footer keeps offering the update.
+  const [updatePrompt, setUpdatePrompt] = useState<{
+    version: string;
+    currentVersion: string;
+  } | null>(null);
 
   const { settings, isLoading, updateChecksLocked } = useSettings();
   // Wait for the lock state too (null = not loaded yet), otherwise the first
@@ -58,6 +64,7 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
       setIsChecking(false);
       setUpdateAvailable(false);
       setShowUpToDate(false);
+      setUpdatePrompt(null);
       return;
     }
 
@@ -92,6 +99,14 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
         setPortableInstallerUrl(
           resolvePortableInstallerUrl(update.rawJson, platform(), arch()),
         );
+        if (!isManualCheckRef.current) {
+          setUpdatePrompt({
+            version: update.version,
+            currentVersion: update.currentVersion,
+          });
+          // Started hidden to the tray: bring the window up so the prompt is seen.
+          commands.showMainWindowCommand().catch(() => {});
+        }
       } else {
         setUpdateAvailable(false);
 
@@ -208,6 +223,35 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
 
   return (
     <>
+      {updatePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background border border-line rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
+            <h2 className="text-base font-semibold">
+              {t("footer.updatePromptTitle")}
+            </h2>
+            <p className="text-sm text-ink-2">
+              {t("footer.updatePromptMessage", updatePrompt)}
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                className="px-3 py-1.5 text-sm rounded border border-line hover:bg-wash transition-colors"
+                onClick={() => setUpdatePrompt(null)}
+              >
+                {t("footer.updatePromptSkip")}
+              </button>
+              <button
+                className="px-3 py-1.5 text-sm rounded bg-logo-primary text-white hover:bg-logo-primary/80 transition-colors"
+                onClick={() => {
+                  setUpdatePrompt(null);
+                  installUpdate();
+                }}
+              >
+                {t("footer.updatePromptInstall")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showPortableUpdateDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-background border border-line rounded-lg p-6 max-w-md w-full mx-4 space-y-4">

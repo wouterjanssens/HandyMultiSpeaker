@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Flytbare installationer kan ikke opdateres automatisk. Download installeren til dit system nedenfor, kør den, og installer i den samme mappe — din Data/-mappe (indstillinger, modeller, optagelser) bliver bevaret.",
     "portableUpdateButton": "Download installer",
     "portableUpdateBrowseMessage": "Flytbare installationer kan ikke opdateres automatisk. Download den nyeste version til dit system fra GitHub Releases, og installer den i den samme mappe — din Data/-mappe (indstillinger, modeller, optagelser) bliver bevaret.",
-    "portableUpdateBrowseButton": "Åbn GitHub Releases"
+    "portableUpdateBrowseButton": "Åbn GitHub Releases",
+    "updatePromptTitle": "Opdatering tilgængelig",
+    "updatePromptMessage": "MeetScribe {{version}} er tilgængelig (du har {{currentVersion}}). Opdater nu? MeetScribe genstarter, når opdateringen er installeret.",
+    "updatePromptInstall": "Opdater nu",
+    "updatePromptSkip": "Spring over til næste genstart"
   },
   "whatsNew": {
     "title": "Nyt i MeetScribe v{{version}}"

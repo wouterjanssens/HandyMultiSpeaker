@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Bản cài đặt di động không thể cập nhật tự động. Hãy tải trình cài đặt phù hợp với hệ thống của bạn bên dưới, chạy nó và cài vào cùng thư mục — thư mục Data/ (cài đặt, mô hình, bản ghi) của bạn được giữ nguyên.",
     "portableUpdateButton": "Tải trình cài đặt",
     "portableUpdateBrowseMessage": "Bản cài đặt di động không thể cập nhật tự động. Hãy tải phiên bản mới nhất phù hợp với hệ thống của bạn từ GitHub Releases và cài vào cùng thư mục — thư mục Data/ (cài đặt, mô hình, bản ghi) của bạn được giữ nguyên.",
-    "portableUpdateBrowseButton": "Mở GitHub Releases"
+    "portableUpdateBrowseButton": "Mở GitHub Releases",
+    "updatePromptTitle": "Có bản cập nhật",
+    "updatePromptMessage": "Đã có MeetScribe {{version}} (bạn đang dùng {{currentVersion}}). Cập nhật ngay? MeetScribe sẽ khởi động lại khi cài đặt xong.",
+    "updatePromptInstall": "Cập nhật ngay",
+    "updatePromptSkip": "Bỏ qua đến lần khởi động sau"
   },
   "whatsNew": {
     "title": "Điểm mới trong MeetScribe v{{version}}"

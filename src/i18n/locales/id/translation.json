@@ -943,7 +943,11 @@
     "portableUpdateMessage": "Instalasi portabel tidak dapat diperbarui secara otomatis. Unduh penginstal untuk sistem Anda di bawah ini, jalankan, lalu instal ke folder yang sama — folder Data/ Anda (pengaturan, model, rekaman) tetap dipertahankan.",
     "portableUpdateButton": "Unduh penginstal",
     "portableUpdateBrowseMessage": "Instalasi portabel tidak dapat diperbarui secara otomatis. Unduh versi terbaru untuk sistem Anda dari GitHub Releases dan instal ke folder yang sama — folder Data/ Anda (pengaturan, model, rekaman) tetap dipertahankan.",
-    "portableUpdateBrowseButton": "Buka GitHub Releases"
+    "portableUpdateBrowseButton": "Buka GitHub Releases",
+    "updatePromptTitle": "Pembaruan tersedia",
+    "updatePromptMessage": "MeetScribe {{version}} tersedia (Anda memiliki {{currentVersion}}). Perbarui sekarang? MeetScribe akan dimulai ulang setelah pembaruan terpasang.",
+    "updatePromptInstall": "Perbarui sekarang",
+    "updatePromptSkip": "Lewati hingga mulai ulang berikutnya"
   },
   "whatsNew": {
     "title": "Baru di MeetScribe v{{version}}"

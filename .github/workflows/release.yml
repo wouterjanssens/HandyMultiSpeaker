@@ -1,6 +1,27 @@
 name: "Release"
 
-on: workflow_dispatch
+# Two ways to trigger a release:
+#   1. Push a version tag:        git tag v1.0.0 && git push origin v1.0.0
+#   2. Run manually from GitHub:  Actions → "Release" → Run workflow → enter a tag
+#
+# The tag decides the app version (it is stamped into tauri.conf.json at build
+# time). The release is created as a draft, the macOS build uploads the .dmg,
+# the signed updater bundle and latest.json, and only then is it published —
+# so running apps never see a half-uploaded release as "latest".
+#
+# Requires the TAURI_SIGNING_PRIVATE_KEY secret (and
+# TAURI_SIGNING_PRIVATE_KEY_PASSWORD if the key has one) matching the pubkey
+# in tauri.conf.json, otherwise installed apps reject the update.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create (e.g. v1.0.0)"
+        required: true
 
 jobs:
   create-release:
@@ -9,18 +30,22 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release-id: ${{ steps.create-release.outputs.result }}
-      version: ${{ steps.get-version.outputs.version }}
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Get version from tauri.conf.json
-        id: get-version
+      - name: Determine version
+        id: version
         shell: bash
         run: |
-          VERSION=$(grep -o '"version": "[^"]*"' src-tauri/tauri.conf.json | cut -d'"' -f4)
-          echo "Application version from tauri.conf.json: $VERSION"
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          # The updater compares versions as semver, so reject anything else.
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Tag '$TAG' is not a semver version like v1.2.3" >&2
+            exit 1
+          fi
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing v$VERSION"
 
       - name: Create Draft Release
         id: create-release
@@ -30,8 +55,9 @@ jobs:
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `v${{ steps.get-version.outputs.version }}`,
-              name: `v${{ steps.get-version.outputs.version }}`,
+              tag_name: "${{ steps.version.outputs.tag }}",
+              target_commitish: context.sha,
+              name: "MeetScribe ${{ steps.version.outputs.version }}",
               draft: true,
               prerelease: false,
               generate_release_notes: true
@@ -49,35 +75,63 @@ jobs:
           - platform: "macos-26" # for Arm based macs (M1 and above). Uses macOS 26 for Apple Intelligence SDK.
             args: "--target aarch64-apple-darwin"
             target: "aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs.
-            args: "--target x86_64-apple-darwin"
-            target: "x86_64-apple-darwin"
-          - platform: "ubuntu-22.04" # Build .deb on 22.04
-            args: "--bundles deb"
-            target: "x86_64-unknown-linux-gnu"
-          - platform: "ubuntu-24.04" # Build AppImage and RPM on 24.04
-            args: "--bundles appimage,rpm"
-            target: "x86_64-unknown-linux-gnu"
-          - platform: "ubuntu-24.04-arm" # Build for ARM64 Linux
-            args: "--bundles appimage,deb,rpm"
-            target: "aarch64-unknown-linux-gnu"
-          - platform: "windows-latest"
-            args: ""
-            target: "x86_64-pc-windows-msvc"
-          - platform: "windows-11-arm" # for ARM64 Windows runner
-            args: "--target aarch64-pc-windows-msvc"
-            target: "aarch64-pc-windows-msvc"
 
     uses: ./.github/workflows/build.yml
     with:
       platform: ${{ matrix.platform }}
       target: ${{ matrix.target }}
-      build-args: ${{ matrix.args }}
-      sign-binaries: true
-      asset-prefix: "handy"
+      # Updater artifacts are off in tauri.conf.json so PR/test builds don't
+      # need the signing key; releases turn them on here.
+      build-args: ${{ matrix.args }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
+      version: ${{ needs.create-release.outputs.version }}
+      # No Apple Developer ID: the app stays ad-hoc signed, but the updater
+      # bundle is signed so installed apps can verify it.
+      sign-binaries: false
+      sign-updater: true
+      asset-prefix: "meetscribe"
       upload-artifacts: false
       release-id: ${{ needs.create-release.outputs.release-id }}
       # Releases always build from scratch — never restore the Rust cache, so a
       # stale cached native lib can never be linked into a shipped artifact.
       no-cache: true
     secrets: inherit
+
+  publish-release:
+    permissions:
+      contents: write
+    needs: [create-release, publish-tauri]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish release
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const version = "${{ needs.create-release.outputs.version }}";
+            const { data: release } = await github.rest.repos.getRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.create-release.outputs.release-id }},
+            });
+            const install = [
+              `## MeetScribe ${version}`,
+              "",
+              "Already running MeetScribe? It will offer this update the next time it starts.",
+              "",
+              "New install: download the `.dmg` below and drag **MeetScribe.app** to `/Applications`.",
+              "",
+              "### First launch",
+              "This build is **ad-hoc signed**, so macOS Gatekeeper warns the first time. Either",
+              "right-click MeetScribe.app → **Open** → **Open**, or clear the download quarantine:",
+              "```",
+              "xattr -dr com.apple.quarantine /Applications/MeetScribe.app",
+              "```",
+              "",
+            ].join("\n");
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              body: `${install}\n${release.body ?? ""}`,
+              draft: false,
+              make_latest: "true",
+            });
