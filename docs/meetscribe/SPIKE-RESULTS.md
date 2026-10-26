@@ -12,12 +12,12 @@ cache; nothing is committed. Runtime NeMo-Speech.cpp is Apache-2.0.
 
 ## Test material
 
-| File | Kind | Length | Speakers | Reference |
-|---|---|---|---|---|
-| AMI `ES2004a.Array1-01` | real meeting, single far-field table mic, English | 17.5 min | 4 | pyannote AMI-diarization-setup, `only_words` |
-| AMI `IS1009a.Array1-01` | same | 14.0 min | 4 | same |
-| `nl_mix_4spk_seed0` | synthetic Dutch, MLS (LibriVox) turns, 10 % short overlaps, light noise | 4.0 min | 4 | generated RTTM |
-| `nl_mix_3spk_seed1` | same | 3.0 min | 3 | generated RTTM |
+| File                    | Kind                                                                    | Length   | Speakers | Reference                                    |
+| ----------------------- | ----------------------------------------------------------------------- | -------- | -------- | -------------------------------------------- |
+| AMI `ES2004a.Array1-01` | real meeting, single far-field table mic, English                       | 17.5 min | 4        | pyannote AMI-diarization-setup, `only_words` |
+| AMI `IS1009a.Array1-01` | same                                                                    | 14.0 min | 4        | same                                         |
+| `nl_mix_4spk_seed0`     | synthetic Dutch, MLS (LibriVox) turns, 10 % short overlaps, light noise | 4.0 min  | 4        | generated RTTM                               |
+| `nl_mix_3spk_seed1`     | same                                                                    | 3.0 min  | 3        | generated RTTM                               |
 
 AMI is CC BY 4.0 (downloaded from the Edinburgh mirror); MLS Dutch is CC BY 4.0 over public-domain
 LibriVox recordings. `research/make_dutch_mix.py` rebuilds the Dutch files deterministically.
@@ -29,16 +29,16 @@ The synthetic references mark whole turns as speech (including short in-turn pau
 
 ## Offline (30.4 s buffer, whole file in one call)
 
-| File | Device | RTF | DER | miss | FA | confusion | speakers |
-|---|---|---|---|---|---|---|---|
-| nl_mix_4spk | CPU | 0.0093 | 10.9 % | 10.9 % | 0 | **0 %** | 4/4 |
-| ES2004a | CPU | 0.0064 | 32.0 % | 29.2 % | 1.7 % | 1.1 % | 4/4 |
-| ES2004a | MPS | 0.0047 | 31.7 % | 28.9 % | 1.7 % | 1.1 % | 4/4 |
-| IS1009a | CPU | 0.0065 | 19.4 % | 15.8 % | 2.4 % | 1.1 % | 4/4 |
-| IS1009a | MPS | 0.0030 | 19.4 % | 15.8 % | 2.4 % | 1.1 % | 4/4 |
+| File        | Device | RTF    | DER    | miss   | FA    | confusion | speakers |
+| ----------- | ------ | ------ | ------ | ------ | ----- | --------- | -------- |
+| nl_mix_4spk | CPU    | 0.0093 | 10.9 % | 10.9 % | 0     | **0 %**   | 4/4      |
+| ES2004a     | CPU    | 0.0064 | 32.0 % | 29.2 % | 1.7 % | 1.1 %     | 4/4      |
+| ES2004a     | MPS    | 0.0047 | 31.7 % | 28.9 % | 1.7 % | 1.1 %     | 4/4      |
+| IS1009a     | CPU    | 0.0065 | 19.4 % | 15.8 % | 2.4 % | 1.1 %     | 4/4      |
+| IS1009a     | MPS    | 0.0030 | 19.4 % | 15.8 % | 2.4 % | 1.1 %     | 4/4      |
 
 ES2004a is a very quiet recording (RMS 0.004). Peak-normalising to 0.9 lowers its DER to 29.7 %;
-loudness normalisation to −23 dBFS made it *worse* (36.4 %, 6 phantom speakers). → at most a
+loudness normalisation to −23 dBFS made it _worse_ (36.4 %, 6 phantom speakers). → at most a
 gentle peak gain in the app, no aggressive AGC.
 
 ## Streaming (the live path)
@@ -49,23 +49,23 @@ plus the chunk, so **RTF ≈ step time / hop** and shorter hops cost proportiona
 
 Speed, IS1009a first 300 s (p80: first 60 s):
 
-| Profile | Buffer | Hop | CPU RTF | CPU step median / p95 | MPS RTF | MPS step median / p95 |
-|---|---|---|---|---|---|---|
-| p80 (1,0) | 80 ms | 80 ms | **1.20 (not real time)** | 103 / 151 ms | 0.52 | 43 / 63 ms |
-| ultra_low (3,1) | 320 ms | 240 ms | 0.49 | 119 / 157 ms | 0.18 | 44 / 54 ms |
-| very_low (6,2) | 640 ms | 480 ms | 0.24 | 117 / 158 ms | 0.091 | 44 / 54 ms |
-| **low (9,4)** | **1040 ms** | **720 ms** | **0.17** | 115 / 161 ms | **0.066** | 47 / 60 ms |
-| p5s (56,8) | 5120 ms | 4480 ms | 0.025 | 112 / 140 ms | 0.012 | 55 / 68 ms |
+| Profile         | Buffer      | Hop        | CPU RTF                  | CPU step median / p95 | MPS RTF   | MPS step median / p95 |
+| --------------- | ----------- | ---------- | ------------------------ | --------------------- | --------- | --------------------- |
+| p80 (1,0)       | 80 ms       | 80 ms      | **1.20 (not real time)** | 103 / 151 ms          | 0.52      | 43 / 63 ms            |
+| ultra_low (3,1) | 320 ms      | 240 ms     | 0.49                     | 119 / 157 ms          | 0.18      | 44 / 54 ms            |
+| very_low (6,2)  | 640 ms      | 480 ms     | 0.24                     | 117 / 158 ms          | 0.091     | 44 / 54 ms            |
+| **low (9,4)**   | **1040 ms** | **720 ms** | **0.17**                 | 115 / 161 ms          | **0.066** | 47 / 60 ms            |
+| p5s (56,8)      | 5120 ms     | 4480 ms    | 0.025                    | 112 / 140 ms          | 0.012     | 55 / 68 ms            |
 
 Accuracy, full files, MPS (CPU gives identical outputs):
 
-| Profile | ES2004a DER (conf.) | IS1009a DER (conf.) | nl 4spk DER (conf.) | nl 3spk DER (conf.) |
-|---|---|---|---|---|
-| p80 | — | 147 % (FA 131 %, 2/4 speakers) on 60 s | — | — |
-| ultra_low | 34.9 % (5.9 %) | 18.6 % (1.4 %) | 12.1 % (0.05 %) | 10.4 % (0 %) |
-| very_low | 33.8 % (5.2 %) | 18.7 % (1.4 %) | 10.7 % (0 %) | 10.0 % (0 %) |
-| **low** | **30.1 % (2.5 %)** | 18.8 % (1.5 %) | 10.1 % (0 %) | 10.0 % (0 %) |
-| p5s | 36.6 % (8.3 %) | 17.9 % (1.2 %) | 9.5 % (0 %) | 10.4 % (0 %) |
+| Profile   | ES2004a DER (conf.) | IS1009a DER (conf.)                    | nl 4spk DER (conf.) | nl 3spk DER (conf.) |
+| --------- | ------------------- | -------------------------------------- | ------------------- | ------------------- |
+| p80       | —                   | 147 % (FA 131 %, 2/4 speakers) on 60 s | —                   | —                   |
+| ultra_low | 34.9 % (5.9 %)      | 18.6 % (1.4 %)                         | 12.1 % (0.05 %)     | 10.4 % (0 %)        |
+| very_low  | 33.8 % (5.2 %)      | 18.7 % (1.4 %)                         | 10.7 % (0 %)        | 10.0 % (0 %)        |
+| **low**   | **30.1 % (2.5 %)**  | 18.8 % (1.5 %)                         | 10.1 % (0 %)        | 10.0 % (0 %)        |
+| p5s       | 36.6 % (8.3 %)      | 17.9 % (1.2 %)                         | 9.5 % (0 %)         | 10.4 % (0 %)        |
 
 All four files: correct speaker count at every profile ≥ 320 ms.
 
@@ -87,12 +87,12 @@ All four files: correct speaker count at every profile ≥ 320 ms.
 
 `Nemotron3DiarizationSpeakerCache` (transformers) – per stream, batch 1, fp32:
 
-| Tensor | Shape | Meaning |
-|---|---|---|
+| Tensor   | Shape           | Meaning                                                                                                     |
+| -------- | --------------- | ----------------------------------------------------------------------------------------------------------- |
 | `embeds` | `(1, 264, 512)` | Arrival-Order Speaker Cache: pre-encoder embeddings of the most informative past frames, grouped by speaker |
-| `probs` | `(1, 264, 8)` | speaker probabilities stored with each cache frame (used when re-compressing) |
-| `fifo` | `(1, 264, 512)` | FIFO of the most recent pre-encoder embeddings |
-| scalars | – | `num_cache_frames`, `num_fifo_frames`, `is_compressed` |
+| `probs`  | `(1, 264, 8)`   | speaker probabilities stored with each cache frame (used when re-compressing)                               |
+| `fifo`   | `(1, 264, 512)` | FIFO of the most recent pre-encoder embeddings                                                              |
+| scalars  | –               | `num_cache_frames`, `num_fifo_frames`, `is_compressed`                                                      |
 
 Config (`streaming_config`): `fifo_length 264`, `speaker_cache_length 264`,
 `speaker_cache_update_period 222`, `speaker_cache_silence_frames_per_speaker 1`, scores
