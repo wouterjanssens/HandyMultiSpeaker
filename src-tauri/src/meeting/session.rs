@@ -51,6 +51,10 @@ pub struct Shared {
     pub diarizer_latency_ms: u64,
     /// Meeting time covered by audio received so far.
     pub audio_ms: u64,
+    /// Current language hint; changeable mid-meeting, read per utterance.
+    pub language: String,
+    /// Whether/how the meeting's ASR model takes a language hint.
+    pub hint_support: super::language::HintSupport,
     pub stats: Stats,
     /// Every utterance's speech-end → text delay, for the end-of-meeting summary.
     asr_delays_ms: Vec<u32>,
@@ -146,6 +150,13 @@ impl Session {
             .or_else(|| settings.asr_model.clone())
             .unwrap_or_default();
 
+        let hint_support = app
+            .state::<Arc<crate::managers::model::ModelManager>>()
+            .get_model_path(&asr_model)
+            .map(|p| super::language::HintSupport::probe(&p))
+            .unwrap_or_default();
+        log::info!("Meeting ASR model {asr_model}: language hint support {hint_support:?}");
+
         let started = chrono::Local::now();
         let shared = Arc::new(Mutex::new(Shared {
             activity: SpeakerActivity::new(diarizer.num_speakers(), diarizer.frame_ms()),
@@ -158,6 +169,8 @@ impl Session {
             diarizer: diarizer.describe(),
             diarizer_latency_ms: diarizer.latency_ms(),
             audio_ms: 0,
+            language: settings.language.clone(),
+            hint_support,
             stats: Stats::default(),
             asr_delays_ms: Vec::new(),
         }));
@@ -538,8 +551,12 @@ fn transcribe_utterance(
 ) {
     let end_sample = u.start_sample + u.pcm.len() as u64;
     let len_ms = samples_to_ms(u.pcm.len() as u64);
+    let language = {
+        let s = shared.lock().unwrap();
+        s.hint_support.resolve(&s.language)
+    };
     let started = Instant::now();
-    let transcript = match tm.transcribe_timed(u.pcm) {
+    let transcript = match tm.transcribe_timed(u.pcm, language) {
         Ok(t) => t,
         Err(e) => {
             log::warn!("Meeting utterance transcription failed: {e:#}");

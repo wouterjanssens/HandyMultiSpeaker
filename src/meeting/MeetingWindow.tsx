@@ -14,6 +14,16 @@ import {
   type TurnDto,
 } from "@/bindings";
 import { Button } from "@/components/ui/Button";
+import { Dropdown } from "@/components/ui/Dropdown";
+
+/** Spoken-language hints; names in their own language, "auto" translated. */
+const LANGUAGES: { value: string; label: string | null }[] = [
+  { value: "auto", label: null },
+  { value: "en", label: "English" },
+  { value: "nl", label: "Nederlands" },
+  { value: "da", label: "Dansk" },
+  { value: "fr", label: "Français" },
+];
 
 /** Emitted on `meeting:stopped` (not part of the generated bindings). */
 interface MeetingOutput {
@@ -37,6 +47,7 @@ const IDLE: MeetingStatus = {
   diarizer: null,
   diarizer_latency_ms: 0,
   stats: null,
+  language_ignored: false,
 };
 
 /** Distinct, theme-neutral hues for up to 8 arrival-ordered speakers. */
@@ -126,12 +137,14 @@ const MeetingWindow: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
   const [copied, setCopied] = useState(false);
+  const [language, setLanguage] = useState("auto");
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
 
   // initial state for a window opened mid-meeting, then live events
   useEffect(() => {
     commands.meetingStatus().then(setStatus);
+    commands.getMeetingSettings().then((s) => setLanguage(s.language));
     commands.meetingTurns().then(setTurns);
     const unlisten = [
       listen<MeetingStatus>("meeting:status", (e) => {
@@ -197,6 +210,19 @@ const MeetingWindow: React.FC = () => {
     if (r.status === "error") setError(r.error);
   }, []);
 
+  const changeLanguage = useCallback(
+    async (value: string) => {
+      const previous = language;
+      setLanguage(value);
+      const r = await commands.meetingSetLanguage(value);
+      if (r.status === "error") {
+        setLanguage(previous);
+        setError(r.error);
+      }
+    },
+    [language],
+  );
+
   const copyTranscript = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(transcriptText(turns));
@@ -251,6 +277,17 @@ const MeetingWindow: React.FC = () => {
           {status.phase === "stopping" && t("meeting.stopping")}
         </span>
         <div className="ml-auto flex items-center gap-2">
+          <div title={t("meeting.languageHint")}>
+            <Dropdown
+              className="w-36"
+              selectedValue={language}
+              options={LANGUAGES.map((l) => ({
+                value: l.value,
+                label: l.label ?? t("meeting.languageAuto"),
+              }))}
+              onSelect={changeLanguage}
+            />
+          </div>
           <Button
             variant="secondary"
             disabled={turns.length === 0}
@@ -280,6 +317,12 @@ const MeetingWindow: React.FC = () => {
           ))
         )}
       </div>
+
+      {status.language_ignored && (
+        <div className="mx-4 mt-3 rounded-lg border border-line bg-warning-wash px-3 py-2 text-sm text-ink-2">
+          {t("meeting.languageIgnored")}
+        </div>
+      )}
 
       {error && (
         <div className="mx-4 mt-3 flex items-start gap-3 rounded-lg border border-line bg-error-wash px-3 py-2 text-sm">

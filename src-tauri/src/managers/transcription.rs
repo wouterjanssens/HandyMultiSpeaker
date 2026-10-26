@@ -989,12 +989,24 @@ impl TranscriptionManager {
 
     // meetscribe: meeting mode needs the timed transcript (words/segments
     // with ms offsets relative to `audio`), not just text. One batch run of the
-    // loaded model, no chunking or text post-processing.
-    pub fn transcribe_timed(&self, audio: Vec<f32>) -> Result<Transcript> {
+    // loaded model, no chunking or text post-processing. `language` is the
+    // meeting's hint, already resolved to a code this model accepts (`None` =
+    // auto-detect); meetings never translate.
+    pub fn transcribe_timed(
+        &self,
+        audio: Vec<f32>,
+        language: Option<String>,
+    ) -> Result<Transcript> {
         let mark = self.engine.cancel_mark();
         self.touch_activity();
         let batch = self.batch_context()?;
-        self.run_batch(mark, audio, &batch.setup.run_options, &batch.active_model)
+        let options = RunOptions {
+            task: Task::Transcribe,
+            language,
+            target_language: None,
+            ..batch.setup.run_options.clone()
+        };
+        self.run_batch(mark, audio, &options, &batch.active_model)
             .map_err(engine_error)
     }
 

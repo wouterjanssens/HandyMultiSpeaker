@@ -5,6 +5,7 @@
 //! holds. Pure logic lives in the `meeting-core` crate; this module wires it to audio capture,
 //! the ASR engine, a diarizer backend, the meeting window and the output files.
 
+pub mod language;
 pub mod model;
 pub mod session;
 pub mod settings;
@@ -126,6 +127,8 @@ pub struct MeetingStatus {
     pub diarizer: Option<String>,
     pub diarizer_latency_ms: f64,
     pub stats: Option<Stats>,
+    /// The chosen language has no effect with the meeting's ASR model.
+    pub language_ignored: bool,
 }
 
 impl MeetingStatus {
@@ -139,6 +142,7 @@ impl MeetingStatus {
             diarizer: None,
             diarizer_latency_ms: 0.0,
             stats: None,
+            language_ignored: false,
         }
     }
 
@@ -160,6 +164,7 @@ impl MeetingStatus {
             diarizer: Some(s.diarizer.clone()),
             diarizer_latency_ms: s.diarizer_latency_ms as f64,
             stats: Some(s.stats.clone()),
+            language_ignored: s.hint_support.ignores(&s.language),
         }
     }
 }
@@ -367,6 +372,28 @@ pub fn meeting_rename_speaker(app: AppHandle, speaker: u8, name: String) -> Resu
         },
     );
     Ok(label)
+}
+
+/// Sets the spoken-language hint; saved for next time and applied to a running meeting from its
+/// next utterance.
+#[tauri::command]
+#[specta::specta]
+pub fn meeting_set_language(app: AppHandle, language: String) -> Result<String, String> {
+    if !settings::MEETING_LANGUAGES.contains(&language.as_str()) {
+        return Err(format!("unsupported meeting language '{language}'"));
+    }
+    let mut s = settings::load(&app);
+    s.language = language.clone();
+    settings::save(&app, &s)?;
+    if let Some(m) = manager(&app) {
+        if let State::Running(session) = &*m.state.lock().unwrap() {
+            let mut s = session.shared.lock().unwrap();
+            s.language = language.clone();
+            let _ = app.emit("meeting:status", MeetingStatus::running(&s));
+        }
+    }
+    log::info!("Meeting language set to {language}");
+    Ok(language)
 }
 
 /// Opens the output folder in Finder / Explorer.

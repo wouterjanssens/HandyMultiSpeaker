@@ -157,7 +157,7 @@ pub struct GgufHeaderProber;
 
 impl CapabilityProber for GgufHeaderProber {
     fn probe_file(&self, path: &Path) -> CapabilityProbe {
-        match read_header_metadata(path) {
+        match read_header_metadata(path, PROBE_KEYS) {
             Ok(meta) => CapabilityProbe::from_metadata(&meta),
             Err(_) => CapabilityProbe::unsupported(),
         }
@@ -167,7 +167,11 @@ impl CapabilityProber for GgufHeaderProber {
 /// Read just enough of `path` to parse its GGUF metadata header, without ever
 /// loading the (potentially multi-GB) tensor data. Grows the prefix
 /// geometrically if a header is unusually large.
-fn read_header_metadata(path: &Path) -> Result<GgufMetadata, GgufError> {
+// meetscribe: pub(crate) with a key list so meeting mode can read language-prompt metadata
+pub(crate) fn read_header_metadata(
+    path: &Path,
+    wanted_keys: &[&str],
+) -> Result<GgufMetadata, GgufError> {
     // The KV metadata block precedes the tensor-info table. Shipping ASR models
     // place all of it well within the first 64 KiB, so that's the common-case
     // read. Older / community GGUFs may carry it deeper, so the loop grows the
@@ -198,7 +202,7 @@ fn read_header_metadata(path: &Path) -> Result<GgufMetadata, GgufError> {
     loop {
         let buf = read_prefix(path, size).map_err(|_| GgufError::Malformed("cannot read file"))?;
         let read_len = buf.len();
-        match gguf_meta::parse_header(&buf, PROBE_KEYS) {
+        match gguf_meta::parse_header(&buf, wanted_keys) {
             Ok(meta) => return Ok(meta),
             Err(GgufError::Truncated { needed }) => {
                 if read_len < size {

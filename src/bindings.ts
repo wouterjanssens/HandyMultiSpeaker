@@ -1014,6 +1014,18 @@ async meetingRenameSpeaker(speaker: number, name: string) : Promise<Result<strin
 }
 },
 /**
+ * Sets the spoken-language hint; saved for next time and applied to a running meeting from its
+ * next utterance.
+ */
+async meetingSetLanguage(language: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("meeting_set_language", { language }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Opens the output folder in Finder / Explorer.
  */
 async meetingRevealOutput(path: string | null) : Promise<Result<null, string>> {
@@ -1238,8 +1250,16 @@ save_audio: boolean;
 /**
  * ASR model for meetings; `None` = the model selected for dictation.
  */
-asr_model: string | null; write_json: boolean; diarizer_backend: DiarizerBackend }
-export type MeetingStatus = { phase: MeetingPhase; started_epoch_ms: number | null; audio_ms: number; speakers: SpeakerDto[]; asr_model: string | null; diarizer: string | null; diarizer_latency_ms: number; stats: Stats | null }
+asr_model: string | null; write_json: boolean; diarizer_backend: DiarizerBackend; 
+/**
+ * Spoken-language hint for meeting transcription: "auto" or an ISO 639-1 code.
+ */
+language: string }
+export type MeetingStatus = { phase: MeetingPhase; started_epoch_ms: number | null; audio_ms: number; speakers: SpeakerDto[]; asr_model: string | null; diarizer: string | null; diarizer_latency_ms: number; stats: Stats | null; 
+/**
+ * The chosen language has no effect with the meeting's ASR model.
+ */
+language_ignored: boolean }
 export type ModelInfo = { id: string; name: string; description: string; filename: string; source: ModelSource; size_mb: number; is_downloaded: boolean; is_downloading: boolean; partial_size: number; accuracy_score: number; speed_score: number; supports_translation: boolean; is_recommended: boolean; supported_languages: string[]; supports_language_selection: boolean; is_custom: boolean; supports_streaming: boolean; supports_language_detection: boolean }
 export type ModelLoadStatus = { is_loaded: boolean; current_model: string | null }
 /**

@@ -1027,6 +1027,9 @@
     "diarizerLag": "speakers settle after {{ms}} ms",
     "utterances": "{{count}} utterances",
     "copy": "Copy transcript",
-    "copied": "Copied"
+    "copied": "Copied",
+    "languageAuto": "Automatic",
+    "languageHint": "Language spoken in the meeting. Pick one if speech is transcribed in the wrong language; applies from the next sentence.",
+    "languageIgnored": "The current meeting model (Parakeet TDT) always detects the language itself, so this choice has no effect. To force a language, pick Nemotron 3.5 ASR or a Whisper model under Settings → Meetings → Meeting transcription model."
   }
 }

@@ -788,6 +788,7 @@ pub fn run(cli_args: CliArgs) {
             meeting::meeting_status,
             meeting::meeting_turns,
             meeting::meeting_rename_speaker,
+            meeting::meeting_set_language,
             meeting::meeting_reveal_output,
             meeting::settings::get_meeting_settings,
             meeting::settings::set_meeting_settings,

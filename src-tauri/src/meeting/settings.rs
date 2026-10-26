@@ -7,6 +7,9 @@ use tauri::{AppHandle, Manager};
 use tauri_plugin_store::StoreExt;
 
 const STORE_PATH: &str = "meeting_settings.json";
+
+/// Language hints offered in the meeting window.
+pub const MEETING_LANGUAGES: &[&str] = &["auto", "en", "nl", "da", "fr"];
 const STORE_KEY: &str = "meeting";
 
 /// Diarizer streaming latency profile (input buffer before a chunk is labelled).
@@ -60,6 +63,8 @@ pub struct MeetingSettings {
     pub asr_model: Option<String>,
     pub write_json: bool,
     pub diarizer_backend: DiarizerBackend,
+    /// Spoken-language hint for meeting transcription: "auto" or an ISO 639-1 code.
+    pub language: String,
 }
 
 impl Default for MeetingSettings {
@@ -72,6 +77,7 @@ impl Default for MeetingSettings {
             asr_model: None,
             write_json: true,
             diarizer_backend: DiarizerBackend::Auto,
+            language: "auto".to_string(),
         }
     }
 }
@@ -81,6 +87,9 @@ impl MeetingSettings {
         self.max_speakers = self.max_speakers.clamp(1, 8);
         self.output_dir = self.output_dir.filter(|d| !d.trim().is_empty());
         self.asr_model = self.asr_model.filter(|m| !m.trim().is_empty());
+        if !MEETING_LANGUAGES.contains(&self.language.as_str()) {
+            self.language = "auto".to_string();
+        }
         self
     }
 
@@ -153,6 +162,12 @@ mod tests {
         assert_eq!(s.max_speakers, 8);
         assert_eq!(s.output_dir, None);
         assert_eq!(s.asr_model, None);
+        let s = MeetingSettings {
+            language: "xx".into(),
+            ..Default::default()
+        }
+        .sanitized();
+        assert_eq!(s.language, "auto");
         assert_eq!(
             MeetingSettings {
                 max_speakers: 0,
@@ -171,5 +186,6 @@ mod tests {
         assert_eq!(s.latency_profile, LatencyProfile::Low);
         assert!(!s.save_audio);
         assert_eq!(s.diarizer_backend, DiarizerBackend::Auto);
+        assert_eq!(s.language, "auto");
     }
 }

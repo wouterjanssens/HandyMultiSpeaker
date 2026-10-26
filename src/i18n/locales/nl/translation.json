@@ -1027,6 +1027,9 @@
     "diarizerLag": "sprekers vast na {{ms}} ms",
     "utterances": "{{count}} fragmenten",
     "copy": "Transcript kopiëren",
-    "copied": "Gekopieerd"
+    "copied": "Gekopieerd",
+    "languageAuto": "Automatisch",
+    "languageHint": "Taal die in de vergadering gesproken wordt. Kies er een als spraak in de verkeerde taal wordt uitgeschreven; geldt vanaf de volgende zin.",
+    "languageIgnored": "Het huidige vergadermodel (Parakeet TDT) bepaalt de taal altijd zelf, dus deze keuze heeft geen effect. Kies Nemotron 3.5 ASR of een Whisper-model onder Instellingen → Vergaderingen → Transcriptiemodel om een taal af te dwingen."
   }
 }
