@@ -1709,6 +1709,11 @@ impl ModelManager {
                     if probe.verdict != Compatibility::Compatible {
                         continue;
                     }
+                    // meetscribe: Sortformer GGUFs are diarizers (e.g. Nemotron 3
+                    // Diarization for meeting mode), never transcription models.
+                    if probe.architecture.as_deref() == Some("sortformer") {
+                        continue;
+                    }
                     let caps = local_caps(&probe);
 
                     let size_mb = path

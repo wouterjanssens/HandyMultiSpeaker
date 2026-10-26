@@ -7,7 +7,9 @@
     "model": "Modell",
     "quit": "Avsluta",
     "cancel": "Avbryt",
-    "secureInputWarning": "⚠ Kortkommandon blockeras av Secure Input"
+    "secureInputWarning": "⚠ Kortkommandon blockeras av Secure Input",
+    "startMeeting": "Start Meeting",
+    "stopMeeting": "Stop Meeting"
   },
   "sidebar": {
     "general": "Allmänt",
@@ -16,13 +18,14 @@
     "postProcessing": "Efterbearbetning",
     "history": "Historik",
     "debug": "Felsökning",
-    "about": "Om"
+    "about": "Om",
+    "meeting": "Meetings"
   },
   "onboarding": {
     "customModelDescription": "Stöds inte officiellt",
     "migration": {
       "title": "Dina modeller behöver uppdateras",
-      "description": "Handy använder nu en nyare typ av modell. Ladda ner den nya versionen för att fortsätta transkribera. Gamla versioner kommer att tas bort.",
+      "description": "MeetScribe använder nu en nyare typ av modell. Ladda ner den nya versionen för att fortsätta transkribera. Gamla versioner kommer att tas bort.",
       "replaces": "Ersätter {{name}}",
       "oldFormat": "Gammalt format",
       "failed": "Nedladdningen misslyckades",
@@ -59,11 +62,11 @@
     "permissions": {
       "microphone": {
         "name": "Mikrofon",
-        "why": "Så att Handy kan höra dig. Ljudet omvandlas till text på den här datorn och laddas aldrig upp."
+        "why": "Så att MeetScribe kan höra dig. Ljudet omvandlas till text på den här datorn och laddas aldrig upp."
       },
       "accessibility": {
         "name": "Hjälpmedel",
-        "why": "Så att din genväg fungerar i alla appar och Handy kan skriva texten där markören står."
+        "why": "Så att din genväg fungerar i alla appar och MeetScribe kan skriva texten där markören står."
       },
       "errors": {
         "checkFailed": "Misslyckades med att kontrollera behörigheter. Försök igen.",
@@ -77,12 +80,12 @@
       "openSettings": "Öppna inställningar",
       "allowed": "Tillåten",
       "waiting": "Väntar",
-      "turnOnMac": "Slå på Handy i Systeminställningar och kom sedan tillbaka hit.",
+      "turnOnMac": "Slå på MeetScribe i Systeminställningar och kom sedan tillbaka hit.",
       "turnOnWindows": "Slå på mikrofonåtkomst i Inställningar i Windows och kom sedan tillbaka hit.",
       "hintBoth": "Tillåt båda för att fortsätta",
       "hintMicrophone": "Tillåt mikrofonen för att fortsätta",
       "welcomeBack": "Välkommen tillbaka. Vi fortsätter där du slutade.",
-      "relaunch": "Svarar inte genvägen efter detta? <relaunch>Starta om Handy</relaunch> så hamnar du direkt här igen."
+      "relaunch": "Svarar inte genvägen efter detta? <relaunch>Starta om MeetScribe</relaunch> så hamnar du direkt här igen."
     },
     "shell": {
       "back": "Tillbaka",
@@ -93,11 +96,11 @@
       "title": "Tala i stället för att skriva, i vilken app som helst",
       "subtitle": "Välj språken du kommer att diktera på",
       "languagesLabel": "Språk",
-      "noMatch": "Inget språk matchar ”{{query}}”. Handys modeller täcker cirka 100 språk, fler finns i inställningarna.",
+      "noMatch": "Inget språk matchar ”{{query}}”. MeetScribes modeller täcker cirka 100 språk, fler finns i inställningarna.",
       "appLanguage": "Appspråk",
       "menusIn": "Menyer på <b>{{language}}</b>",
       "chinese": {
-        "question": "Du talar {{languages}}. Vilka tecken ska Handy skriva?",
+        "question": "Du talar {{languages}}. Vilka tecken ska MeetScribe skriva?",
         "label": "Kinesiska tecken",
         "zh-Hans": "Förenklad",
         "zh-Hant": "Taiwan",
@@ -167,7 +170,7 @@
     },
     "try": {
       "title": "Testa nu!",
-      "subtitle": "Handy finns i hörnet och guidar dig",
+      "subtitle": "MeetScribe finns i hörnet och guidar dig",
       "noteLabel": "Anteckning",
       "placeholder": "Ny anteckning",
       "hold": "Håll in <keys/> och tala.",
@@ -195,14 +198,14 @@
     },
     "done": {
       "title": "Nu är allt klart",
-      "subMac": "Handy finns nu i menyraden. Håll in eller tryck på <keys/> i valfri app för att tala.",
-      "subTray": "Handy finns nu i systemfältet. Håll in eller tryck på <keys/> i valfri app för att tala.",
+      "subMac": "MeetScribe finns nu i menyraden. Håll in eller tryck på <keys/> i valfri app för att tala.",
+      "subTray": "MeetScribe finns nu i systemfältet. Håll in eller tryck på <keys/> i valfri app för att tala.",
       "hint": "Du kan ändra detta senare i Inställningar",
       "highFiveLabel": "Femman",
-      "atLogin": "Starta Handy när jag loggar in",
+      "atLogin": "Starta MeetScribe när jag loggar in",
       "finish": "Klar",
       "panel": {
-        "name": "Handy",
+        "name": "MeetScribe",
         "ready": "Redo",
         "languages": "Språk",
         "model": "Talmodell",
@@ -327,7 +330,7 @@
     "general": {
       "title": "Allmänt",
       "shortcut": {
-        "title": "Handy-kortkommandon",
+        "title": "MeetScribe-kortkommandon",
         "description": "Konfigurera kortkommandon för att starta tal-till-text-inspelning",
         "loading": "Laddar kortkommandon...",
         "none": "Inga kortkommandon konfigurerade",
@@ -345,6 +348,10 @@
           "transcribe_with_post_process": {
             "name": "Snabbkommando för efterbearbetning",
             "description": "Valfritt: En dedikerad snabbknapp som alltid tillämpar AI-efterbearbetning på din transkription."
+          },
+          "toggle_meeting": {
+            "name": "Meeting Shortcut",
+            "description": "Starts or stops a meeting transcript with speaker labels."
           }
         },
         "errors": {
@@ -360,7 +367,7 @@
       },
       "preferredLanguages": {
         "title": "Föredragna språk",
-        "description": "Språken du talar. Handy använder dem för att rekommendera modeller.",
+        "description": "Språken du talar. MeetScribe använder dem för att rekommendera modeller.",
         "noMatch": "Inget språk matchar ”{{query}}”",
         "weak": "Ingen modell känner igen {{languages}} bra ännu."
       },
@@ -387,17 +394,17 @@
         "fits": "För dina språk",
         "untested": "Ej testade"
       },
-      "untestedNote": "Inte testade med Handy. De kan vara långsammare eller göra fler fel.",
+      "untestedNote": "Inte testade med MeetScribe. De kan vara långsammare eller göra fler fel.",
       "untestedHidden_one": "{{count}} modell till är inte anpassad för diktering. Sök för att hitta den.",
       "untestedHidden_other": "{{count}} modeller till är inte anpassade för diktering. Sök för att hitta en.",
-      "emptyYours": "Inga modeller ännu. Välj en nedan: den laddas ner och sedan använder Handy den.",
+      "emptyYours": "Inga modeller ännu. Välj en nedan: den laddas ner och sedan använder MeetScribe den.",
       "showMore": "Visa {{count}} till",
       "showFewer": "Visa färre",
       "download": "Ladda ner och använd",
       "downloadingThenUse": "{{percent}} % av {{total}}, sedan byts modell",
       "loading": "Laddar…",
       "deleteAsk": "Ta bort {{name}}? Det frigör {{size}}.",
-      "deleteAskActive": "Ta bort {{name}}? Handy kan inte transkribera förrän du väljer en annan.",
+      "deleteAskActive": "Ta bort {{name}}? MeetScribe kan inte transkribera förrän du väljer en annan.",
       "cancel": "Avbryt",
       "deleteModel": "Ta bort {{name}}",
       "cancelDownload": "Stoppa nedladdningen av {{name}}",
@@ -411,7 +418,7 @@
         "marks": "? har inte mätts ännu. — hör inte det språket."
       },
       "retiredNotice": {
-        "title": "Gamla modeller fungerar inte längre med Handy",
+        "title": "Gamla modeller fungerar inte längre med MeetScribe",
         "description": "De tar upp {{size}} på din dator.",
         "delete": "Ta bort modeller",
         "deleted": "Gamla modeller borttagna",
@@ -419,7 +426,7 @@
       },
       "rescan": {
         "label": "Skanna om",
-        "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför Handy"
+        "tooltip": "Skanna om efter modeller som lagts till i modellmappen eller Hugging Face-cachen utanför MeetScribe"
       }
     },
     "languages": {
@@ -485,11 +492,11 @@
       },
       "autostart": {
         "label": "Starta vid uppstart",
-        "description": "Starta Handy automatiskt när du loggar in på din dator."
+        "description": "Starta MeetScribe automatiskt när du loggar in på din dator."
       },
       "showTrayIcon": {
         "label": "Visa ikon i systemfältet",
-        "description": "Visa Handy-ikonen i systemfältet."
+        "description": "Visa MeetScribe-ikonen i systemfältet."
       },
       "overlay": {
         "style": {
@@ -720,7 +727,7 @@
       },
       "updateChecks": {
         "label": "Sök efter uppdateringar",
-        "description": "Sök automatiskt efter nya versioner av Handy",
+        "description": "Sök automatiskt efter nya versioner av MeetScribe",
         "lockedDescription": "Inaktiverad av systemkonfiguration (HANDY_DISABLE_UPDATER)"
       },
       "whatsNewPreview": {
@@ -825,7 +832,7 @@
       },
       "keyboardDiagnostic": {
         "title": "Tangentbordsdiagnostik",
-        "description": "Kontrollerar om tangentbordshändelser når Handy. Endast antalet händelser registreras — aldrig vilka tangenter du trycker på.",
+        "description": "Kontrollerar om tangentbordshändelser når MeetScribe. Endast antalet händelser registreras — aldrig vilka tangenter du trycker på.",
         "run": "Kör 10 s diagnostik",
         "running": "Lyssnar… tryck på ditt kortkommando några gånger (t.ex. Option+Space)",
         "secureInputLabel": "Secure Input",
@@ -839,7 +846,7 @@
         "mouse": "Mus",
         "verdictBlocked": "Secure Input blockerar tangenthändelser — kortkommandon med en vanlig tangent kan inte fungera förrän det är löst.",
         "verdictSuspicious": "Modifierarhändelser kom fram men inga tangenthändelser — något undertrycker tangenter trots att Secure Input rapporteras som inaktiverat. Rapportera gärna detta på GitHub.",
-        "verdictOk": "Tangenthändelser når Handy som vanligt.",
+        "verdictOk": "Tangenthändelser når MeetScribe som vanligt.",
         "verdictNoEvents": "Inga händelser fångades — tryckte du på några tangenter under testet?",
         "failed": "Diagnostiken misslyckades: {{error}}"
       }
@@ -848,15 +855,15 @@
       "title": "Om",
       "version": {
         "title": "Version",
-        "description": "Nuvarande version av Handy"
+        "description": "Nuvarande version av MeetScribe"
       },
       "whatsNewUpdates": {
         "label": "Visa nyheter",
-        "description": "Visa versionsinformation efter Handy-uppdateringar"
+        "description": "Visa versionsinformation efter MeetScribe-uppdateringar"
       },
       "appDataDirectory": {
         "title": "Mapp för appdata",
-        "description": "Plats där Handy lagrar sina data"
+        "description": "Plats där MeetScribe lagrar sina data"
       },
       "sourceCode": {
         "title": "Källkod",
@@ -865,7 +872,7 @@
       },
       "supportDevelopment": {
         "title": "Stöd utvecklingen",
-        "description": "Hjälp oss att fortsätta bygga Handy",
+        "description": "Hjälp oss att fortsätta bygga MeetScribe",
         "button": "Donera"
       },
       "acknowledgments": {
@@ -873,8 +880,53 @@
         "ggml": {
           "title": "ggml",
           "description": "Högpresterande inferens av OpenAI:s Whisper-modell för automatisk taligenkänning",
-          "details": "Handy använder ggml för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
+          "details": "MeetScribe använder ggml för snabb, lokal tal-till-text-behandling. Tack till det fantastiska arbete som utförts av Georgi Gerganov med medarbetare."
         }
+      }
+    },
+    "meeting": {
+      "title": "Meetings",
+      "open": {
+        "label": "Meeting window",
+        "description": "Open the live meeting transcript window.",
+        "button": "Open"
+      },
+      "maxSpeakers": {
+        "label": "Maximum speakers",
+        "description": "Upper bound on distinct speakers in a transcript (1–8). Accuracy drops above about four."
+      },
+      "latency": {
+        "label": "Speaker latency",
+        "description": "How much audio the diarizer waits for before labelling speakers. Longer is more accurate, shorter feels more live.",
+        "ultra_low": "0.3 s (fastest)",
+        "very_low": "0.6 s",
+        "low": "1 s (recommended)",
+        "high": "5 s (most stable)"
+      },
+      "outputDir": {
+        "label": "Output folder",
+        "description": "Where transcripts are saved. Empty uses Documents/MeetScribe.",
+        "placeholder": "Documents/MeetScribe"
+      },
+      "saveAudio": {
+        "label": "Save meeting audio",
+        "description": "Also keep a WAV recording next to the transcript. Off by default."
+      },
+      "writeJson": {
+        "label": "Word-level JSON",
+        "description": "Write a .json file with word timings and speakers next to the Markdown transcript."
+      },
+      "asrModel": {
+        "label": "Meeting transcription model",
+        "description": "Speech model used during meetings. Parakeet models give word-level timing (best speaker alignment); Whisper gives sentence-level timing.",
+        "same": "Same as dictation"
+      },
+      "backend": {
+        "label": "Diarizer",
+        "description": "Engine that detects who is speaking.",
+        "python_sidecar": "Nemotron 3 Diarization (Python prototype)",
+        "auto": "Automatic (native if available)",
+        "native": "Nemotron 3 Diarization (native, Metal)"
       }
     }
   },
@@ -894,7 +946,7 @@
     "portableUpdateBrowseButton": "Öppna GitHub Releases"
   },
   "whatsNew": {
-    "title": "Nytt i Handy v{{version}}"
+    "title": "Nytt i MeetScribe v{{version}}"
   },
   "common": {
     "loading": "Laddar...",
@@ -925,11 +977,11 @@
   },
   "appLanguage": {
     "title": "Applikationsspråk",
-    "description": "Ändra språket i Handy-gränssnittet"
+    "description": "Ändra språket i MeetScribe-gränssnittet"
   },
   "theme": {
     "title": "Apptema",
-    "description": "Välj om Handy ska följa systemets tema eller förbli ljust eller mörkt",
+    "description": "Välj om MeetScribe ska följa systemets tema eller förbli ljust eller mörkt",
     "options": {
       "system": "System",
       "light": "Ljust",
@@ -951,5 +1003,33 @@
     "learnMore": "Så här löser du det",
     "recorderBlocked": "Det går inte att spela in kortkommandon just nu — macOS Secure Input blockerar tangenthändelser. Lös varningen om Secure Input först.",
     "dismiss": "Avfärda"
+  },
+  "meeting": {
+    "title": "Meeting",
+    "start": "Start meeting",
+    "stop": "Stop meeting",
+    "starting": "Starting… loading models",
+    "stopping": "Finishing and saving…",
+    "idleHint": "Start a meeting to get a live transcript with speaker labels. Everything stays on this Mac.",
+    "waiting": "Listening… text appears a moment after each sentence.",
+    "speakers": "Speakers",
+    "noSpeakers": "No speakers yet",
+    "renameHint": "Click a name to rename that speaker everywhere",
+    "renamePlaceholder": "Name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "savedTo": "Transcript saved",
+    "reveal": "Show in folder",
+    "openFolder": "Open meetings folder",
+    "errorTitle": "Meeting problem",
+    "dismiss": "Dismiss",
+    "asrDelay": "Speech → text {{ms}} ms",
+    "diarizerLag": "speakers settle after {{ms}} ms",
+    "utterances": "{{count}} utterances",
+    "copy": "Copy transcript",
+    "copied": "Copied",
+    "languageAuto": "Automatic",
+    "languageHint": "Language spoken in the meeting. Pick one if speech is transcribed in the wrong language; applies from the next sentence.",
+    "languageIgnored": "The current meeting model (Parakeet TDT) always detects the language itself, so this choice has no effect. To force a language, pick Nemotron 3.5 ASR or a Whisper model under Settings → Meetings → Meeting transcription model."
   }
 }

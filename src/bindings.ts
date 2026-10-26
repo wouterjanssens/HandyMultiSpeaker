@@ -986,6 +986,66 @@ async isLaptop() : Promise<Result<boolean, string>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async meetingToggle() : Promise<void> {
+    await TAURI_INVOKE("meeting_toggle");
+},
+async meetingOpenWindow() : Promise<void> {
+    await TAURI_INVOKE("meeting_open_window");
+},
+async meetingStatus() : Promise<MeetingStatus> {
+    return await TAURI_INVOKE("meeting_status");
+},
+/**
+ * Current transcript (for a window opened mid-meeting).
+ */
+async meetingTurns() : Promise<TurnDto[]> {
+    return await TAURI_INVOKE("meeting_turns");
+},
+/**
+ * Names a speaker; applies to the whole transcript, including the saved file.
+ */
+async meetingRenameSpeaker(speaker: number, name: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("meeting_rename_speaker", { speaker, name }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Sets the spoken-language hint; saved for next time and applied to a running meeting from its
+ * next utterance.
+ */
+async meetingSetLanguage(language: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("meeting_set_language", { language }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Opens the output folder in Finder / Explorer.
+ */
+async meetingRevealOutput(path: string | null) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("meeting_reveal_output", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getMeetingSettings() : Promise<MeetingSettings> {
+    return await TAURI_INVOKE("get_meeting_settings");
+},
+async setMeetingSettings(settings: MeetingSettings) : Promise<Result<MeetingSettings, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_meeting_settings", { settings }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -1116,6 +1176,19 @@ export type ChineseScript =
 "traditional_hk"
 export type ClipboardHandling = "dont_modify" | "copy_to_clipboard"
 export type CustomSounds = { start: boolean; stop: boolean }
+export type DiarizerBackend = 
+/**
+ * Native when this build linked NeMo-Speech.cpp, otherwise the Python sidecar.
+ */
+"auto" | 
+/**
+ * NeMo-Speech.cpp in-process (ggml/Metal).
+ */
+"native" | 
+/**
+ * Temporary: Hugging Face reference implementation in a Python process (dev builds only).
+ */
+"python_sidecar"
 export type GpuDeviceOption = { id: string; name: string; total_vram_mb: number }
 export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; 
 /**
@@ -1139,7 +1212,54 @@ export type KeyboardDiagnosticReport = { secure_input_enabled: boolean; culprit_
 key_down: number; key_up: number; flags_changed: number; mouse: number; duration_ms: number }
 export type KeyboardImplementation = "tauri" | "handy_keys"
 export type LLMPrompt = { id: string; name: string; prompt: string }
+/**
+ * Diarizer streaming latency profile (input buffer before a chunk is labelled).
+ */
+export type LatencyProfile = 
+/**
+ * 0.32 s buffer, 0.24 s hop.
+ */
+"ultra_low" | 
+/**
+ * 0.64 s buffer, 0.48 s hop.
+ */
+"very_low" | 
+/**
+ * 1.04 s buffer, 0.72 s hop (recommended; best accuracy/latency trade-off in the spike).
+ */
+"low" | 
+/**
+ * 5.12 s buffer, 4.48 s hop.
+ */
+"high"
 export type LogLevel = "trace" | "debug" | "info" | "warn" | "error"
+export type MeetingPhase = "idle" | "starting" | "running" | "stopping"
+export type MeetingSettings = { 
+/**
+ * Speakers the transcript may use (1–8). Diarizer channels beyond this are ignored.
+ */
+max_speakers: number; latency_profile: LatencyProfile; 
+/**
+ * Folder for transcripts; `None` = `~/Documents/MeetScribe`.
+ */
+output_dir: string | null; 
+/**
+ * Also keep the meeting audio as a WAV next to the transcript.
+ */
+save_audio: boolean; 
+/**
+ * ASR model for meetings; `None` = the model selected for dictation.
+ */
+asr_model: string | null; write_json: boolean; diarizer_backend: DiarizerBackend; 
+/**
+ * Spoken-language hint for meeting transcription: "auto" or an ISO 639-1 code.
+ */
+language: string }
+export type MeetingStatus = { phase: MeetingPhase; started_epoch_ms: number | null; audio_ms: number; speakers: SpeakerDto[]; asr_model: string | null; diarizer: string | null; diarizer_latency_ms: number; stats: Stats | null; 
+/**
+ * The chosen language has no effect with the meeting's ASR model.
+ */
+language_ignored: boolean }
 export type ModelInfo = { id: string; name: string; description: string; filename: string; source: ModelSource; size_mb: number; is_downloaded: boolean; is_downloading: boolean; partial_size: number; accuracy_score: number; speed_score: number; supports_translation: boolean; is_recommended: boolean; supported_languages: string[]; supports_language_selection: boolean; is_custom: boolean; supports_streaming: boolean; supports_language_detection: boolean }
 export type ModelLoadStatus = { is_loaded: boolean; current_model: string | null }
 /**
@@ -1272,6 +1392,16 @@ export type ShortcutActivation =
 "hold_or_toggle"
 export type ShortcutBinding = { id: string; name: string; description: string; default_binding: string; current_binding: string }
 export type SoundTheme = "marimba" | "pop" | "custom"
+export type SpeakerDto = { id: number; label: string; custom_name: string | null }
+export type Stats = { utterances: number; 
+/**
+ * Utterance end → words on screen (ASR compute + queueing), last and max.
+ */
+last_asr_delay_ms: number; max_asr_delay_ms: number; 
+/**
+ * How far diarization trails the captured audio.
+ */
+diarizer_lag_ms: number }
 /**
  * Phase of the streaming overlay card, emitted to drive its UI state.
  */
@@ -1351,6 +1481,10 @@ export type TranscriptionOutcome =
  * Transcribing or pasting failed.
  */
 "failed"
+/**
+ * A turn as the meeting window renders it.
+ */
+export type TurnDto = { id: number; speaker: number | null; label: string; start_ms: number; end_ms: number; text: string; locked: boolean }
 export type TypingTool = "auto" | "wtype" | "kwtype" | "dotool" | "ydotool" | "xdotool"
 export type VadBackend = "silero" | "earshot"
 export type WindowsMicrophonePermissionStatus = { supported: boolean; overall_access: PermissionAccess; device_access: PermissionAccess; app_access: PermissionAccess; desktop_app_access: PermissionAccess }

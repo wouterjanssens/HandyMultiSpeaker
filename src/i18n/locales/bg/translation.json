@@ -7,7 +7,9 @@
     "model": "Модел",
     "quit": "Изход",
     "cancel": "Отказ",
-    "secureInputWarning": "⚠ Бързите клавиши са блокирани от Secure Input"
+    "secureInputWarning": "⚠ Бързите клавиши са блокирани от Secure Input",
+    "startMeeting": "Start Meeting",
+    "stopMeeting": "Stop Meeting"
   },
   "sidebar": {
     "general": "Общи",
@@ -16,13 +18,14 @@
     "postProcessing": "Постобработка",
     "history": "История",
     "debug": "Отстраняване",
-    "about": "За приложението"
+    "about": "За приложението",
+    "meeting": "Meetings"
   },
   "onboarding": {
     "customModelDescription": "Не се поддържа официално",
     "migration": {
       "title": "Моделите ви се нуждаят от обновяване",
-      "description": "Handy вече използва по-нов вид модели. Изтеглете новата версия, за да продължите да транскрибирате. Старите версии ще бъдат премахнати.",
+      "description": "MeetScribe вече използва по-нов вид модели. Изтеглете новата версия, за да продължите да транскрибирате. Старите версии ще бъдат премахнати.",
       "replaces": "Заменя {{name}}",
       "oldFormat": "Стар формат",
       "failed": "Изтеглянето е неуспешно",
@@ -59,11 +62,11 @@
     "permissions": {
       "microphone": {
         "name": "Микрофон",
-        "why": "За да може Handy да ви чува. Звукът се превръща в текст на този компютър и никога не се качва никъде."
+        "why": "За да може MeetScribe да ви чува. Звукът се превръща в текст на този компютър и никога не се качва никъде."
       },
       "accessibility": {
         "name": "Достъпност",
-        "why": "За да работи бързият ви клавиш във всяко приложение и Handy да въвежда текста там, където е курсорът ви."
+        "why": "За да работи бързият ви клавиш във всяко приложение и MeetScribe да въвежда текста там, където е курсорът ви."
       },
       "errors": {
         "checkFailed": "Проверката на разрешенията не бе успешна. Опитайте отново.",
@@ -77,12 +80,12 @@
       "openSettings": "Отвори настройките",
       "allowed": "Разрешено",
       "waiting": "Изчакване",
-      "turnOnMac": "Включете Handy в Системни настройки, после се върнете тук.",
+      "turnOnMac": "Включете MeetScribe в Системни настройки, после се върнете тук.",
       "turnOnWindows": "Включете достъпа до микрофона в Настройки на Windows, после се върнете тук.",
       "hintBoth": "Разрешете и двете, за да продължите",
       "hintMicrophone": "Разрешете микрофона, за да продължите",
       "welcomeBack": "Добре дошли отново. Продължаваме от където спряхте.",
-      "relaunch": "Бързият клавиш не реагира след това? <relaunch>Рестартирайте Handy</relaunch> и ще се озовете точно тук."
+      "relaunch": "Бързият клавиш не реагира след това? <relaunch>Рестартирайте MeetScribe</relaunch> и ще се озовете точно тук."
     },
     "shell": {
       "back": "Назад",
@@ -93,11 +96,11 @@
       "title": "Говорете вместо да пишете, във всяко приложение",
       "subtitle": "Изберете езиците, на които ще диктувате",
       "languagesLabel": "Езици",
-      "noMatch": "Няма език, който съвпада с „{{query}}“. Моделите на Handy покриват около 100 езика; още има в настройките.",
+      "noMatch": "Няма език, който съвпада с „{{query}}“. Моделите на MeetScribe покриват около 100 езика; още има в настройките.",
       "appLanguage": "Език на приложението",
       "menusIn": "Менюта на <b>{{language}}</b>",
       "chinese": {
-        "question": "Говорите {{languages}}. Кои йероглифи да пише Handy?",
+        "question": "Говорите {{languages}}. Кои йероглифи да пише MeetScribe?",
         "label": "Китайски йероглифи",
         "zh-Hans": "Опростени",
         "zh-Hant": "Тайван",
@@ -167,7 +170,7 @@
     },
     "try": {
       "title": "Пробвайте!",
-      "subtitle": "Handy е в ъгъла, за да ви води стъпка по стъпка",
+      "subtitle": "MeetScribe е в ъгъла, за да ви води стъпка по стъпка",
       "noteLabel": "Бележка",
       "placeholder": "Нова бележка",
       "hold": "Задръжте <keys/> и говорете.",
@@ -195,14 +198,14 @@
     },
     "done": {
       "title": "Всичко е готово",
-      "subMac": "Handy вече е в лентата с менюта. Задръжте или натиснете <keys/> във всяко приложение, за да говорите.",
-      "subTray": "Handy вече е в системната област. Задръжте или натиснете <keys/> във всяко приложение, за да говорите.",
+      "subMac": "MeetScribe вече е в лентата с менюта. Задръжте или натиснете <keys/> във всяко приложение, за да говорите.",
+      "subTray": "MeetScribe вече е в системната област. Задръжте или натиснете <keys/> във всяко приложение, за да говорите.",
       "hint": "Можете да промените това по-късно в Настройки",
       "highFiveLabel": "Дай пет",
-      "atLogin": "Стартирай Handy при влизане в системата",
+      "atLogin": "Стартирай MeetScribe при влизане в системата",
       "finish": "Готово",
       "panel": {
-        "name": "Handy",
+        "name": "MeetScribe",
         "ready": "Готов",
         "languages": "Езици",
         "model": "Модел за реч",
@@ -327,7 +330,7 @@
     "general": {
       "title": "Общи",
       "shortcut": {
-        "title": "Бързи клавиши на Handy",
+        "title": "Бързи клавиши на MeetScribe",
         "description": "Настройте клавишни комбинации за стартиране на запис за реч към текст",
         "loading": "Зареждане на бързите клавиши...",
         "none": "Няма настроени бързи клавиши",
@@ -345,6 +348,10 @@
           "transcribe_with_post_process": {
             "name": "Бърз клавиш за постобработка",
             "description": "По избор: отделна комбинация, която винаги прилага ИИ постобработка върху транскрипцията."
+          },
+          "toggle_meeting": {
+            "name": "Meeting Shortcut",
+            "description": "Starts or stops a meeting transcript with speaker labels."
           }
         },
         "errors": {
@@ -360,7 +367,7 @@
       },
       "preferredLanguages": {
         "title": "Предпочитани езици",
-        "description": "Езиците, на които говорите. Handy ги използва, за да препоръчва модели.",
+        "description": "Езиците, на които говорите. MeetScribe ги използва, за да препоръчва модели.",
         "noMatch": "Няма език, който съвпада с „{{query}}“",
         "weak": "Все още няма модел, който разпознава добре {{languages}}."
       },
@@ -387,17 +394,17 @@
         "fits": "За вашите езици",
         "untested": "Нетествани"
       },
-      "untestedNote": "Не са тествани с Handy. Може да са по-бавни или да правят повече грешки.",
+      "untestedNote": "Не са тествани с MeetScribe. Може да са по-бавни или да правят повече грешки.",
       "untestedHidden_one": "{{count}} друг модел не е пригоден за диктуване. Потърсете, за да го намерите.",
       "untestedHidden_other": "{{count}} други модела не са пригодени за диктуване. Потърсете, за да намерите някой.",
-      "emptyYours": "Още няма модели. Изберете един по-долу: изтегля се и Handy го използва.",
+      "emptyYours": "Още няма модели. Изберете един по-долу: изтегля се и MeetScribe го използва.",
       "showMore": "Покажи още {{count}}",
       "showFewer": "Покажи по-малко",
       "download": "Изтегли и използвай",
       "downloadingThenUse": "{{percent}}% от {{total}}, после превключва",
       "loading": "Зареждане…",
       "deleteAsk": "Да се изтрие ли {{name}}? Освобождава {{size}}.",
-      "deleteAskActive": "Да се изтрие ли {{name}}? Handy не може да транскрибира, докато не изберете друг.",
+      "deleteAskActive": "Да се изтрие ли {{name}}? MeetScribe не може да транскрибира, докато не изберете друг.",
       "cancel": "Отказ",
       "deleteModel": "Изтрий {{name}}",
       "cancelDownload": "Спри изтеглянето на {{name}}",
@@ -411,7 +418,7 @@
         "marks": "? още не е измерено. — не разбира този език."
       },
       "retiredNotice": {
-        "title": "Старите модели вече не работят с Handy",
+        "title": "Старите модели вече не работят с MeetScribe",
         "description": "Заемат {{size}} на компютъра ви.",
         "delete": "Изтрий моделите",
         "deleted": "Старите модели са изтрити",
@@ -419,7 +426,7 @@
       },
       "rescan": {
         "label": "Сканиране отново",
-        "tooltip": "Сканиране отново за модели, добавени в папката с модели или кеша на Hugging Face извън Handy"
+        "tooltip": "Сканиране отново за модели, добавени в папката с модели или кеша на Hugging Face извън MeetScribe"
       }
     },
     "languages": {
@@ -485,11 +492,11 @@
       },
       "autostart": {
         "label": "Стартиране със системата",
-        "description": "Автоматично стартиране на Handy при влизане в профила ви."
+        "description": "Автоматично стартиране на MeetScribe при влизане в профила ви."
       },
       "showTrayIcon": {
         "label": "Икона в системната област",
-        "description": "Показване на иконата на Handy в системната област."
+        "description": "Показване на иконата на MeetScribe в системната област."
       },
       "overlay": {
         "style": {
@@ -720,7 +727,7 @@
       },
       "updateChecks": {
         "label": "Проверка за актуализации",
-        "description": "Автоматична проверка за нови версии на Handy",
+        "description": "Автоматична проверка за нови версии на MeetScribe",
         "lockedDescription": "Деактивирано от системната конфигурация (HANDY_DISABLE_UPDATER)"
       },
       "whatsNewPreview": {
@@ -825,7 +832,7 @@
       },
       "keyboardDiagnostic": {
         "title": "Диагностика на клавиатурата",
-        "description": "Проверява дали клавиатурните събития достигат до Handy. Записва се само броят на събитията — никога кои клавиши натискате.",
+        "description": "Проверява дали клавиатурните събития достигат до MeetScribe. Записва се само броят на събитията — никога кои клавиши натискате.",
         "run": "Стартиране на 10-секундна диагностика",
         "running": "Слушане… натиснете бързия си клавиш няколко пъти (напр. Option+Space)",
         "secureInputLabel": "Secure Input",
@@ -839,7 +846,7 @@
         "mouse": "Мишка",
         "verdictBlocked": "Secure Input блокира клавишните събития — бързите клавиши с обикновен клавиш не могат да работят, докато това не бъде решено.",
         "verdictSuspicious": "Пристигнаха събития от модификатори, но нито едно клавишно събитие — нещо потиска клавишите, въпреки че Secure Input се отчита като изключен. Моля, съобщете за това в GitHub.",
-        "verdictOk": "Клавишните събития достигат до Handy нормално.",
+        "verdictOk": "Клавишните събития достигат до MeetScribe нормално.",
         "verdictNoEvents": "Не са уловени събития — натиснахте ли някакви клавиши по време на теста?",
         "failed": "Диагностиката е неуспешна: {{error}}"
       }
@@ -848,15 +855,15 @@
       "title": "За приложението",
       "version": {
         "title": "Версия",
-        "description": "Текуща версия на Handy"
+        "description": "Текуща версия на MeetScribe"
       },
       "whatsNewUpdates": {
         "label": "Показвай новостите",
-        "description": "Показвай бележки към изданието след актуализации на Handy"
+        "description": "Показвай бележки към изданието след актуализации на MeetScribe"
       },
       "appDataDirectory": {
         "title": "Папка с данни на приложението",
-        "description": "Мястото, където Handy съхранява данните си"
+        "description": "Мястото, където MeetScribe съхранява данните си"
       },
       "sourceCode": {
         "title": "Изходен код",
@@ -865,7 +872,7 @@
       },
       "supportDevelopment": {
         "title": "Подкрепете разработката",
-        "description": "Помогнете ни да продължим да развиваме Handy",
+        "description": "Помогнете ни да продължим да развиваме MeetScribe",
         "button": "Дарение"
       },
       "acknowledgments": {
@@ -873,8 +880,53 @@
         "ggml": {
           "title": "ggml",
           "description": "Високопроизводително изпълнение на автоматичния модел за разпознаване на реч Whisper на OpenAI",
-          "details": "Handy използва ggml за бързо локално реч-към-текст. Благодарности на Georgi Gerganov и сътрудниците за отличната работа."
+          "details": "MeetScribe използва ggml за бързо локално реч-към-текст. Благодарности на Georgi Gerganov и сътрудниците за отличната работа."
         }
+      }
+    },
+    "meeting": {
+      "title": "Meetings",
+      "open": {
+        "label": "Meeting window",
+        "description": "Open the live meeting transcript window.",
+        "button": "Open"
+      },
+      "maxSpeakers": {
+        "label": "Maximum speakers",
+        "description": "Upper bound on distinct speakers in a transcript (1–8). Accuracy drops above about four."
+      },
+      "latency": {
+        "label": "Speaker latency",
+        "description": "How much audio the diarizer waits for before labelling speakers. Longer is more accurate, shorter feels more live.",
+        "ultra_low": "0.3 s (fastest)",
+        "very_low": "0.6 s",
+        "low": "1 s (recommended)",
+        "high": "5 s (most stable)"
+      },
+      "outputDir": {
+        "label": "Output folder",
+        "description": "Where transcripts are saved. Empty uses Documents/MeetScribe.",
+        "placeholder": "Documents/MeetScribe"
+      },
+      "saveAudio": {
+        "label": "Save meeting audio",
+        "description": "Also keep a WAV recording next to the transcript. Off by default."
+      },
+      "writeJson": {
+        "label": "Word-level JSON",
+        "description": "Write a .json file with word timings and speakers next to the Markdown transcript."
+      },
+      "asrModel": {
+        "label": "Meeting transcription model",
+        "description": "Speech model used during meetings. Parakeet models give word-level timing (best speaker alignment); Whisper gives sentence-level timing.",
+        "same": "Same as dictation"
+      },
+      "backend": {
+        "label": "Diarizer",
+        "description": "Engine that detects who is speaking.",
+        "python_sidecar": "Nemotron 3 Diarization (Python prototype)",
+        "auto": "Automatic (native if available)",
+        "native": "Nemotron 3 Diarization (native, Metal)"
       }
     }
   },
@@ -894,7 +946,7 @@
     "portableUpdateBrowseButton": "Отвори GitHub Releases"
   },
   "whatsNew": {
-    "title": "Ново в Handy v{{version}}"
+    "title": "Ново в MeetScribe v{{version}}"
   },
   "common": {
     "loading": "Зареждане...",
@@ -925,11 +977,11 @@
   },
   "appLanguage": {
     "title": "Език на приложението",
-    "description": "Промяна на езика на интерфейса на Handy"
+    "description": "Промяна на езика на интерфейса на MeetScribe"
   },
   "theme": {
     "title": "Тема на приложението",
-    "description": "Изберете дали Handy да следва системната тема, или да остане светла или тъмна",
+    "description": "Изберете дали MeetScribe да следва системната тема, или да остане светла или тъмна",
     "options": {
       "system": "Системна",
       "light": "Светла",
@@ -951,5 +1003,33 @@
     "learnMore": "Как да поправите това",
     "recorderBlocked": "В момента не могат да се записват бързи клавиши — Secure Input на macOS блокира клавишните събития. Първо отстранете предупреждението за Secure Input.",
     "dismiss": "Отхвърляне"
+  },
+  "meeting": {
+    "title": "Meeting",
+    "start": "Start meeting",
+    "stop": "Stop meeting",
+    "starting": "Starting… loading models",
+    "stopping": "Finishing and saving…",
+    "idleHint": "Start a meeting to get a live transcript with speaker labels. Everything stays on this Mac.",
+    "waiting": "Listening… text appears a moment after each sentence.",
+    "speakers": "Speakers",
+    "noSpeakers": "No speakers yet",
+    "renameHint": "Click a name to rename that speaker everywhere",
+    "renamePlaceholder": "Name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "savedTo": "Transcript saved",
+    "reveal": "Show in folder",
+    "openFolder": "Open meetings folder",
+    "errorTitle": "Meeting problem",
+    "dismiss": "Dismiss",
+    "asrDelay": "Speech → text {{ms}} ms",
+    "diarizerLag": "speakers settle after {{ms}} ms",
+    "utterances": "{{count}} utterances",
+    "copy": "Copy transcript",
+    "copied": "Copied",
+    "languageAuto": "Automatic",
+    "languageHint": "Language spoken in the meeting. Pick one if speech is transcribed in the wrong language; applies from the next sentence.",
+    "languageIgnored": "The current meeting model (Parakeet TDT) always detects the language itself, so this choice has no effect. To force a language, pick Nemotron 3.5 ASR or a Whisper model under Settings → Meetings → Meeting transcription model."
   }
 }

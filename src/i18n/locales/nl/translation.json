@@ -7,7 +7,9 @@
     "model": "Model",
     "quit": "Afsluiten",
     "cancel": "Annuleren",
-    "secureInputWarning": "⚠ Sneltoetsen geblokkeerd door Secure Input"
+    "secureInputWarning": "⚠ Sneltoetsen geblokkeerd door Secure Input",
+    "startMeeting": "Vergadering starten",
+    "stopMeeting": "Vergadering stoppen"
   },
   "sidebar": {
     "general": "Algemeen",
@@ -16,13 +18,14 @@
     "postProcessing": "Naverwerking",
     "history": "Geschiedenis",
     "debug": "Probleemoplossing",
-    "about": "Over Handy"
+    "about": "Over MeetScribe",
+    "meeting": "Vergaderingen"
   },
   "onboarding": {
     "customModelDescription": "Niet officieel ondersteund",
     "migration": {
       "title": "Je modellen moeten worden bijgewerkt",
-      "description": "Handy gebruikt nu een nieuwer soort model. Download de nieuwe versie om te blijven transcriberen. Oude versies worden verwijderd.",
+      "description": "MeetScribe gebruikt nu een nieuwer soort model. Download de nieuwe versie om te blijven transcriberen. Oude versies worden verwijderd.",
       "replaces": "Vervangt {{name}}",
       "oldFormat": "Oud formaat",
       "failed": "Downloaden mislukt",
@@ -59,11 +62,11 @@
     "permissions": {
       "microphone": {
         "name": "Microfoon",
-        "why": "Zodat Handy je kan horen. Audio wordt op deze computer omgezet in tekst en nooit geüpload."
+        "why": "Zodat MeetScribe je kan horen. Audio wordt op deze computer omgezet in tekst en nooit geüpload."
       },
       "accessibility": {
         "name": "Toegankelijkheid",
-        "why": "Zodat je sneltoets in elke app werkt en Handy de tekst kan typen waar je cursor staat."
+        "why": "Zodat je sneltoets in elke app werkt en MeetScribe de tekst kan typen waar je cursor staat."
       },
       "errors": {
         "checkFailed": "Machtigingen controleren mislukt. Probeer het opnieuw.",
@@ -77,12 +80,12 @@
       "openSettings": "Instellingen openen",
       "allowed": "Toegestaan",
       "waiting": "Wachten",
-      "turnOnMac": "Zet Handy aan in Systeeminstellingen en kom dan hier terug.",
+      "turnOnMac": "Zet MeetScribe aan in Systeeminstellingen en kom dan hier terug.",
       "turnOnWindows": "Zet toegang tot de microfoon aan in Windows-instellingen en kom dan hier terug.",
       "hintBoth": "Sta beide toe om door te gaan",
       "hintMicrophone": "Sta de microfoon toe om door te gaan",
       "welcomeBack": "Welkom terug. We gaan verder waar je was gebleven.",
-      "relaunch": "Reageert de sneltoets hierna niet? <relaunch>Start Handy opnieuw</relaunch> en je komt direct weer hier uit."
+      "relaunch": "Reageert de sneltoets hierna niet? <relaunch>Start MeetScribe opnieuw</relaunch> en je komt direct weer hier uit."
     },
     "shell": {
       "back": "Terug",
@@ -93,11 +96,11 @@
       "title": "Praat in plaats van typen, in elke app",
       "subtitle": "Kies de talen waarin je gaat dicteren",
       "languagesLabel": "Talen",
-      "noMatch": "Geen taal gevonden voor „{{query}}”. De modellen van Handy dekken ongeveer 100 talen; meer vind je in de instellingen.",
+      "noMatch": "Geen taal gevonden voor „{{query}}”. De modellen van MeetScribe dekken ongeveer 100 talen; meer vind je in de instellingen.",
       "appLanguage": "App-taal",
       "menusIn": "Menu’s in het <b>{{language}}</b>",
       "chinese": {
-        "question": "Je spreekt {{languages}}. Welke tekens moet Handy schrijven?",
+        "question": "Je spreekt {{languages}}. Welke tekens moet MeetScribe schrijven?",
         "label": "Chinese tekens",
         "zh-Hans": "Vereenvoudigd",
         "zh-Hant": "Taiwan",
@@ -167,7 +170,7 @@
     },
     "try": {
       "title": "Probeer het maar!",
-      "subtitle": "Handy staat in de hoek om je er doorheen te helpen",
+      "subtitle": "MeetScribe staat in de hoek om je er doorheen te helpen",
       "noteLabel": "Notitie",
       "placeholder": "Nieuwe notitie",
       "hold": "Houd <keys/> ingedrukt en praat.",
@@ -195,14 +198,14 @@
     },
     "done": {
       "title": "Alles is klaar",
-      "subMac": "Handy staat nu in je menubalk. Houd <keys/> ingedrukt of tik erop in elke app om te praten.",
-      "subTray": "Handy staat nu in je systeemvak. Houd <keys/> ingedrukt of tik erop in elke app om te praten.",
+      "subMac": "MeetScribe staat nu in je menubalk. Houd <keys/> ingedrukt of tik erop in elke app om te praten.",
+      "subTray": "MeetScribe staat nu in je systeemvak. Houd <keys/> ingedrukt of tik erop in elke app om te praten.",
       "hint": "Je kunt dit later wijzigen in de instellingen",
       "highFiveLabel": "High five",
-      "atLogin": "Handy starten als ik inlog",
+      "atLogin": "MeetScribe starten als ik inlog",
       "finish": "Klaar",
       "panel": {
-        "name": "Handy",
+        "name": "MeetScribe",
         "ready": "Klaar",
         "languages": "Talen",
         "model": "Spraakmodel",
@@ -345,6 +348,10 @@
           "transcribe_with_post_process": {
             "name": "Sneltoets voor naverwerking",
             "description": "Optioneel: Een specifieke sneltoets die altijd AI-naverwerking toepast op je transcriptie."
+          },
+          "toggle_meeting": {
+            "name": "Sneltoets vergadering",
+            "description": "Start of stopt een vergadertranscript met sprekerlabels."
           }
         },
         "errors": {
@@ -360,7 +367,7 @@
       },
       "preferredLanguages": {
         "title": "Voorkeurstalen",
-        "description": "De talen die je spreekt. Handy gebruikt ze om modellen aan te bevelen.",
+        "description": "De talen die je spreekt. MeetScribe gebruikt ze om modellen aan te bevelen.",
         "noMatch": "Geen taal gevonden voor „{{query}}”",
         "weak": "Geen enkel model herkent {{languages}} al goed."
       },
@@ -387,17 +394,17 @@
         "fits": "Voor jouw talen",
         "untested": "Niet getest"
       },
-      "untestedNote": "Niet getest met Handy. Ze kunnen langzamer zijn of meer fouten maken.",
+      "untestedNote": "Niet getest met MeetScribe. Ze kunnen langzamer zijn of meer fouten maken.",
       "untestedHidden_one": "{{count}} ander model is niet afgestemd op dicteren. Zoek om het te vinden.",
       "untestedHidden_other": "{{count}} andere modellen zijn niet afgestemd op dicteren. Zoek om er een te vinden.",
-      "emptyYours": "Nog geen modellen. Kies hieronder een model: het wordt gedownload en daarna gebruikt Handy het.",
+      "emptyYours": "Nog geen modellen. Kies hieronder een model: het wordt gedownload en daarna gebruikt MeetScribe het.",
       "showMore": "{{count}} meer tonen",
       "showFewer": "Minder tonen",
       "download": "Downloaden en gebruiken",
       "downloadingThenUse": "{{percent}}% van {{total}}, daarna wordt overgeschakeld",
       "loading": "Laden…",
       "deleteAsk": "{{name}} verwijderen? Dit maakt {{size}} vrij.",
-      "deleteAskActive": "{{name}} verwijderen? Handy kan niet transcriberen totdat je een ander model kiest.",
+      "deleteAskActive": "{{name}} verwijderen? MeetScribe kan niet transcriberen totdat je een ander model kiest.",
       "cancel": "Annuleren",
       "deleteModel": "{{name}} verwijderen",
       "cancelDownload": "Downloaden van {{name}} stoppen",
@@ -411,7 +418,7 @@
         "marks": "? is nog niet gemeten. — verstaat die taal niet."
       },
       "retiredNotice": {
-        "title": "Oude modellen werken niet meer met Handy",
+        "title": "Oude modellen werken niet meer met MeetScribe",
         "description": "Ze nemen {{size}} in beslag op je computer.",
         "delete": "Modellen verwijderen",
         "deleted": "Oude modellen verwijderd",
@@ -419,7 +426,7 @@
       },
       "rescan": {
         "label": "Opnieuw scannen",
-        "tooltip": "Scannen naar modellen die buiten Handy om zijn toegevoegd aan de modellenmap of Hugging Face-cache"
+        "tooltip": "Scannen naar modellen die buiten MeetScribe om zijn toegevoegd aan de modellenmap of Hugging Face-cache"
       }
     },
     "languages": {
@@ -485,11 +492,11 @@
       },
       "autostart": {
         "label": "Starten bij opstarten",
-        "description": "Handy automatisch starten zodra je inlogt op je computer."
+        "description": "MeetScribe automatisch starten zodra je inlogt op je computer."
       },
       "showTrayIcon": {
         "label": "Pictogram in systeemvak tonen",
-        "description": "Toon het Handy-pictogram in het systeemvak."
+        "description": "Toon het MeetScribe-pictogram in het systeemvak."
       },
       "overlay": {
         "style": {
@@ -720,7 +727,7 @@
       },
       "updateChecks": {
         "label": "Controleren op updates",
-        "description": "Automatisch controleren op nieuwe versies van Handy",
+        "description": "Automatisch controleren op nieuwe versies van MeetScribe",
         "lockedDescription": "Uitgeschakeld door systeemconfiguratie (HANDY_DISABLE_UPDATER)"
       },
       "whatsNewPreview": {
@@ -825,7 +832,7 @@
       },
       "keyboardDiagnostic": {
         "title": "Toetsenborddiagnose",
-        "description": "Controleert of toetsenbordgebeurtenissen Handy bereiken. Alleen het aantal gebeurtenissen wordt vastgelegd — nooit welke toetsen je indrukt.",
+        "description": "Controleert of toetsenbordgebeurtenissen MeetScribe bereiken. Alleen het aantal gebeurtenissen wordt vastgelegd — nooit welke toetsen je indrukt.",
         "run": "Diagnose van 10 s uitvoeren",
         "running": "Luisteren… druk je sneltoets een paar keer in (bijv. Option+Space)",
         "secureInputLabel": "Secure Input",
@@ -839,24 +846,24 @@
         "mouse": "Muis",
         "verdictBlocked": "Secure Input blokkeert toetsgebeurtenissen — sneltoetsen met een gewone toets kunnen pas weer werken als dit is opgelost.",
         "verdictSuspicious": "Er kwamen wel modificatiegebeurtenissen binnen, maar geen toetsgebeurtenissen — iets onderdrukt toetsen terwijl Secure Input als uitgeschakeld wordt gemeld. Meld dit op GitHub.",
-        "verdictOk": "Toetsgebeurtenissen bereiken Handy normaal.",
+        "verdictOk": "Toetsgebeurtenissen bereiken MeetScribe normaal.",
         "verdictNoEvents": "Geen gebeurtenissen vastgelegd — heb je tijdens de test toetsen ingedrukt?",
         "failed": "Diagnose mislukt: {{error}}"
       }
     },
     "about": {
-      "title": "Over Handy",
+      "title": "Over MeetScribe",
       "version": {
         "title": "Versie",
-        "description": "Huidige versie van Handy"
+        "description": "Huidige versie van MeetScribe"
       },
       "whatsNewUpdates": {
         "label": "Toon 'Wat is er nieuw'",
-        "description": "Release-notes tonen nadat Handy is bijgewerkt"
+        "description": "Release-notes tonen nadat MeetScribe is bijgewerkt"
       },
       "appDataDirectory": {
         "title": "App-datamap",
-        "description": "Locatie waar Handy de gegevens opslaat"
+        "description": "Locatie waar MeetScribe de gegevens opslaat"
       },
       "sourceCode": {
         "title": "Broncode",
@@ -865,7 +872,7 @@
       },
       "supportDevelopment": {
         "title": "Ontwikkeling ondersteunen",
-        "description": "Help ons om te blijven bouwen aan Handy",
+        "description": "Help ons om te blijven bouwen aan MeetScribe",
         "button": "Doneren"
       },
       "acknowledgments": {
@@ -873,8 +880,53 @@
         "ggml": {
           "title": "ggml",
           "description": "Krachtige tensorbibliotheek voor lokale AI-verwerking",
-          "details": "Handy's lokale spraak-naar-tekst is gebouwd op transcribe.cpp en ggml. Met dank aan het geweldige werk van Georgi Gerganov en alle bijdragers."
+          "details": "MeetScribe's lokale spraak-naar-tekst is gebouwd op transcribe.cpp en ggml. Met dank aan het geweldige werk van Georgi Gerganov en alle bijdragers."
         }
+      }
+    },
+    "meeting": {
+      "title": "Vergaderingen",
+      "open": {
+        "label": "Vergadervenster",
+        "description": "Open het venster met het live transcript.",
+        "button": "Openen"
+      },
+      "maxSpeakers": {
+        "label": "Maximum aantal sprekers",
+        "description": "Bovengrens voor het aantal verschillende sprekers (1–8). Boven vier daalt de nauwkeurigheid."
+      },
+      "latency": {
+        "label": "Sprekervertraging",
+        "description": "Hoeveel audio de diarizer afwacht voor hij sprekers labelt. Langer is nauwkeuriger, korter voelt meer live.",
+        "ultra_low": "0,3 s (snelst)",
+        "very_low": "0,6 s",
+        "low": "1 s (aanbevolen)",
+        "high": "5 s (stabielst)"
+      },
+      "outputDir": {
+        "label": "Uitvoermap",
+        "description": "Waar transcripten worden bewaard. Leeg = Documenten/MeetScribe.",
+        "placeholder": "Documenten/MeetScribe"
+      },
+      "saveAudio": {
+        "label": "Audio bewaren",
+        "description": "Bewaar ook een WAV-opname naast het transcript. Standaard uit."
+      },
+      "writeJson": {
+        "label": "JSON per woord",
+        "description": "Schrijf een .json-bestand met woordtijden en sprekers naast het Markdown-transcript."
+      },
+      "asrModel": {
+        "label": "Transcriptiemodel voor vergaderingen",
+        "description": "Spraakmodel tijdens vergaderingen. Parakeet geeft tijden per woord (beste sprekertoewijzing); Whisper per zin.",
+        "same": "Zelfde als dicteren"
+      },
+      "backend": {
+        "label": "Diarizer",
+        "description": "Engine die bepaalt wie er spreekt.",
+        "python_sidecar": "Nemotron 3 Diarization (Python-prototype)",
+        "auto": "Automatisch (native indien beschikbaar)",
+        "native": "Nemotron 3 Diarization (native, Metal)"
       }
     }
   },
@@ -894,7 +946,7 @@
     "portableUpdateBrowseButton": "GitHub Releases openen"
   },
   "whatsNew": {
-    "title": "Nieuw in Handy v{{version}}"
+    "title": "Nieuw in MeetScribe v{{version}}"
   },
   "common": {
     "loading": "Laden...",
@@ -925,11 +977,11 @@
   },
   "appLanguage": {
     "title": "Interfacetaal",
-    "description": "Wijzig de taal van de Handy-interface"
+    "description": "Wijzig de taal van de MeetScribe-interface"
   },
   "theme": {
     "title": "App-thema",
-    "description": "Kies of Handy het systeemthema volgt of licht of donker blijft",
+    "description": "Kies of MeetScribe het systeemthema volgt of licht of donker blijft",
     "options": {
       "system": "Systeem",
       "light": "Licht",
@@ -951,5 +1003,33 @@
     "learnMore": "Hoe je dit oplost",
     "recorderBlocked": "Sneltoetsen kunnen nu niet worden opgenomen — Secure Input van macOS blokkeert toetsgebeurtenissen. Los eerst de Secure Input-waarschuwing op.",
     "dismiss": "Sluiten"
+  },
+  "meeting": {
+    "title": "Vergadering",
+    "start": "Vergadering starten",
+    "stop": "Vergadering stoppen",
+    "starting": "Bezig met starten… modellen laden",
+    "stopping": "Afronden en opslaan…",
+    "idleHint": "Start een vergadering voor een live transcript met sprekerlabels. Alles blijft op deze Mac.",
+    "waiting": "Aan het luisteren… tekst verschijnt kort na elke zin.",
+    "speakers": "Sprekers",
+    "noSpeakers": "Nog geen sprekers",
+    "renameHint": "Klik op een naam om die spreker overal te hernoemen",
+    "renamePlaceholder": "Naam",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "savedTo": "Transcript opgeslagen",
+    "reveal": "Toon in map",
+    "openFolder": "Open map met vergaderingen",
+    "errorTitle": "Probleem met de vergadering",
+    "dismiss": "Sluiten",
+    "asrDelay": "Spraak → tekst {{ms}} ms",
+    "diarizerLag": "sprekers vast na {{ms}} ms",
+    "utterances": "{{count}} fragmenten",
+    "copy": "Transcript kopiëren",
+    "copied": "Gekopieerd",
+    "languageAuto": "Automatisch",
+    "languageHint": "Taal die in de vergadering gesproken wordt. Kies er een als spraak in de verkeerde taal wordt uitgeschreven; geldt vanaf de volgende zin.",
+    "languageIgnored": "Het huidige vergadermodel (Parakeet TDT) bepaalt de taal altijd zelf, dus deze keuze heeft geen effect. Kies Nemotron 3.5 ASR of een Whisper-model onder Instellingen → Vergaderingen → Transcriptiemodel om een taal af te dwingen."
   }
 }

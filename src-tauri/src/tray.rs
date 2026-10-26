@@ -66,6 +66,8 @@ struct MenuInputs {
     downloaded_models: Vec<(String, String)>,
     locale: String,
     update_checks_enabled: bool,
+    // meetscribe: Start/Stop Meeting item
+    meeting: crate::meeting::MeetingPhase,
 }
 
 /// Complete description of what the tray should look like.
@@ -336,6 +338,13 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
         .collect();
     downloaded_models.sort_by(|a, b| a.1.cmp(&b.1));
 
+    // meetscribe: a running meeting shows the recording icon
+    let meeting = crate::meeting::phase(app);
+    let icon_state = if meeting == crate::meeting::MeetingPhase::Running {
+        TrayIconState::Recording
+    } else {
+        icon_state
+    };
     TrayDesired {
         icon_path: get_icon_path(theme, icon_state, warning),
         menu: MenuInputs {
@@ -347,6 +356,7 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
             downloaded_models,
             locale: settings.app_language,
             update_checks_enabled: settings.update_checks_enabled,
+            meeting,
         },
     }
 }
@@ -457,11 +467,38 @@ pub fn tray_tooltip() -> String {
 }
 
 fn version_label() -> String {
+    // meetscribe: own product name
     if cfg!(debug_assertions) {
-        format!("Handy v{} (Dev)", env!("CARGO_PKG_VERSION"))
+        format!("MeetScribe v{} (Dev)", env!("CARGO_PKG_VERSION"))
     } else {
-        format!("Handy v{}", env!("CARGO_PKG_VERSION"))
+        format!("MeetScribe v{}", env!("CARGO_PKG_VERSION"))
     }
+}
+
+// meetscribe: "Start Meeting" / "Stop Meeting" (disabled while starting/stopping).
+// Untranslated locales fall back to English, like the Secure Input entry.
+fn meeting_menu_item(
+    app: &AppHandle,
+    strings: &crate::tray_i18n::TrayStrings,
+    phase: crate::meeting::MeetingPhase,
+) -> tauri::Result<MenuItem<tauri::Wry>> {
+    use crate::meeting::MeetingPhase;
+    let english = || get_tray_translations(Some("en".to_string()));
+    let pick = |s: &String, fallback: fn(crate::tray_i18n::TrayStrings) -> String| {
+        if s.is_empty() {
+            fallback(english())
+        } else {
+            s.clone()
+        }
+    };
+    let (label, enabled) = match phase {
+        MeetingPhase::Idle => (pick(&strings.start_meeting, |e| e.start_meeting), true),
+        MeetingPhase::Running => (pick(&strings.stop_meeting, |e| e.stop_meeting), true),
+        MeetingPhase::Starting | MeetingPhase::Stopping => {
+            (pick(&strings.stop_meeting, |e| e.stop_meeting), false)
+        }
+    };
+    MenuItem::with_id(app, "toggle_meeting", &label, enabled, None::<&str>)
 }
 
 /// Builds the tray menu and tooltip for the given inputs. Pure with respect
@@ -524,6 +561,7 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
     )?;
     let quit_i = MenuItem::with_id(app, "quit", &strings.quit, true, quit_accelerator)?;
     let separator = || PredefinedMenuItem::separator(app);
+    let meeting_i = meeting_menu_item(app, &strings, inputs.meeting)?; // meetscribe
 
     let menu = if inputs.busy {
         let cancel_i = MenuItem::with_id(app, "cancel", &strings.cancel, true, None::<&str>)?;
@@ -532,6 +570,7 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
             &[
                 &version_i,
                 &separator()?,
+                &meeting_i,
                 &cancel_i,
                 &separator()?,
                 &copy_last_transcript_i,
@@ -572,6 +611,8 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
             app,
             &[
                 &version_i,
+                &separator()?,
+                &meeting_i,
                 &separator()?,
                 &copy_last_transcript_i,
                 &separator()?,
@@ -710,6 +751,7 @@ mod tests {
             downloaded_models: vec![("small".to_string(), "Small".to_string())],
             locale: "en".to_string(),
             update_checks_enabled: true,
+            meeting: crate::meeting::MeetingPhase::Idle,
         }
     }
 

@@ -34,6 +34,12 @@ pub fn handle_shortcut_event(
 ) {
     let settings = get_settings(app);
 
+    // meetscribe: a meeting holds the microphone; dictation and cancel wait.
+    if crate::meeting::is_active(app) && binding_id != crate::meeting::MEETING_BINDING {
+        log::debug!("Ignoring shortcut '{binding_id}' during a meeting");
+        return;
+    }
+
     // Transcribe bindings are handled by the coordinator.
     if is_transcribe_binding(binding_id) {
         if let Some(coordinator) = app.try_state::<TranscriptionCoordinator>() {

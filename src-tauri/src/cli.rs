@@ -2,7 +2,8 @@ use clap::Parser;
 use std::path::PathBuf;
 
 #[derive(Parser, Debug, Clone, Default)]
-#[command(name = "handy", about = "Handy - Speech to Text")]
+// meetscribe: own product name (binary/crate names stay `handy` for upstream merges)
+#[command(name = "meetscribe", about = "MeetScribe - Speech to Text")]
 pub struct CliArgs {
     /// Start with the main window hidden
     #[arg(long)]
@@ -23,6 +24,11 @@ pub struct CliArgs {
     /// Cancel the current operation (sent to running instance)
     #[arg(long)]
     pub cancel: bool,
+
+    // meetscribe: meeting mode
+    /// Start or stop a meeting recording (sent to running instance)
+    #[arg(long)]
+    pub toggle_meeting: bool,
 
     /// Enable debug mode with verbose logging
     #[arg(long)]

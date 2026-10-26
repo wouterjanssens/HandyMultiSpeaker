@@ -1,0 +1,12 @@
+[package]
+name = "diarize"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "MeetScribe streaming speaker diarization: Rust binding to NVIDIA NeMo-Speech.cpp (Nemotron 3 Diarization). No Tauri dependency."
+publish = false
+
+[dependencies]
+anyhow = "1"
+meeting-core = { path = "../meeting-core" }
+hound = "3.5"

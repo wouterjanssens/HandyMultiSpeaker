@@ -7,7 +7,9 @@
     "model": "النموذج",
     "quit": "إنهاء",
     "cancel": "إلغاء",
-    "secureInputWarning": "⚠ الاختصارات محجوبة بواسطة Secure Input"
+    "secureInputWarning": "⚠ الاختصارات محجوبة بواسطة Secure Input",
+    "startMeeting": "Start Meeting",
+    "stopMeeting": "Stop Meeting"
   },
   "sidebar": {
     "general": "عام",
@@ -16,13 +18,14 @@
     "postProcessing": "معالجة لاحقة",
     "history": "السجل",
     "debug": "تصحيح الأخطاء",
-    "about": "حول"
+    "about": "حول",
+    "meeting": "Meetings"
   },
   "onboarding": {
     "customModelDescription": "غير مدعوم رسميًا",
     "migration": {
       "title": "نماذجك بحاجة إلى تحديث",
-      "description": "يستخدم Handy الآن نوعًا أحدث من النماذج. نزّل الإصدار الجديد لمواصلة التفريغ الصوتي. ستتم إزالة الإصدارات القديمة.",
+      "description": "يستخدم MeetScribe الآن نوعًا أحدث من النماذج. نزّل الإصدار الجديد لمواصلة التفريغ الصوتي. ستتم إزالة الإصدارات القديمة.",
       "replaces": "يحل محل {{name}}",
       "oldFormat": "تنسيق قديم",
       "failed": "فشل التنزيل",
@@ -59,11 +62,11 @@
     "permissions": {
       "microphone": {
         "name": "الميكروفون",
-        "why": "ليتمكن Handy من سماعك. يُحوَّل الصوت إلى نص على هذا الكمبيوتر ولا يُرفع أبدًا."
+        "why": "ليتمكن MeetScribe من سماعك. يُحوَّل الصوت إلى نص على هذا الكمبيوتر ولا يُرفع أبدًا."
       },
       "accessibility": {
         "name": "إمكانية الوصول",
-        "why": "ليعمل اختصارك في كل التطبيقات، ويتمكن Handy من كتابة النص حيث يوجد المؤشر."
+        "why": "ليعمل اختصارك في كل التطبيقات، ويتمكن MeetScribe من كتابة النص حيث يوجد المؤشر."
       },
       "errors": {
         "checkFailed": "فشل التحقق من الأذونات. يرجير المحاولة مرة أخرى.",
@@ -77,12 +80,12 @@
       "openSettings": "فتح الإعدادات",
       "allowed": "تم السماح",
       "waiting": "في الانتظار",
-      "turnOnMac": "فعّل Handy في «إعدادات النظام»، ثم عد إلى هنا.",
+      "turnOnMac": "فعّل MeetScribe في «إعدادات النظام»، ثم عد إلى هنا.",
       "turnOnWindows": "فعّل الوصول إلى الميكروفون في «إعدادات Windows»، ثم عد إلى هنا.",
       "hintBoth": "اسمح بالإذنين للمتابعة",
       "hintMicrophone": "اسمح بالوصول إلى الميكروفون للمتابعة",
       "welcomeBack": "أهلًا بعودتك. سنكمل من حيث توقفت.",
-      "relaunch": "الاختصار لا يستجيب بعد هذا؟ <relaunch>أعد تشغيل Handy</relaunch> وستعود إلى هنا مباشرة."
+      "relaunch": "الاختصار لا يستجيب بعد هذا؟ <relaunch>أعد تشغيل MeetScribe</relaunch> وستعود إلى هنا مباشرة."
     },
     "shell": {
       "back": "رجوع",
@@ -93,11 +96,11 @@
       "title": "تحدّث بدل أن تكتب، في أي تطبيق",
       "subtitle": "اختر اللغات التي ستُملي بها",
       "languagesLabel": "اللغات",
-      "noMatch": "لا توجد لغة تطابق «{{query}}». تغطي نماذج Handy نحو 100 لغة، والمزيد في الإعدادات.",
+      "noMatch": "لا توجد لغة تطابق «{{query}}». تغطي نماذج MeetScribe نحو 100 لغة، والمزيد في الإعدادات.",
       "appLanguage": "لغة التطبيق",
       "menusIn": "القوائم بـ<b>{{language}}</b>",
       "chinese": {
-        "question": "أنت تتحدث {{languages}}. بأي حروف يجب أن يكتب Handy؟",
+        "question": "أنت تتحدث {{languages}}. بأي حروف يجب أن يكتب MeetScribe؟",
         "label": "الحروف الصينية",
         "zh-Hans": "المبسّطة",
         "zh-Hant": "تايوان",
@@ -167,7 +170,7 @@
     },
     "try": {
       "title": "جرّبه الآن!",
-      "subtitle": "Handy في الزاوية ليرشدك خطوة بخطوة",
+      "subtitle": "MeetScribe في الزاوية ليرشدك خطوة بخطوة",
       "noteLabel": "ملاحظة",
       "placeholder": "ملاحظة جديدة",
       "hold": "اضغط مطوّلًا على <keys/> وتحدّث.",
@@ -195,14 +198,14 @@
     },
     "done": {
       "title": "كل شيء جاهز",
-      "subMac": "Handy الآن في شريط القوائم. اضغط مطوّلًا أو انقر على <keys/> في أي تطبيق لتتحدث.",
-      "subTray": "Handy الآن في صينية النظام. اضغط مطوّلًا أو انقر على <keys/> في أي تطبيق لتتحدث.",
+      "subMac": "MeetScribe الآن في شريط القوائم. اضغط مطوّلًا أو انقر على <keys/> في أي تطبيق لتتحدث.",
+      "subTray": "MeetScribe الآن في صينية النظام. اضغط مطوّلًا أو انقر على <keys/> في أي تطبيق لتتحدث.",
       "hint": "يمكنك تغيير هذه لاحقًا من الإعدادات",
       "highFiveLabel": "كفّك",
-      "atLogin": "تشغيل Handy عند تسجيل الدخول",
+      "atLogin": "تشغيل MeetScribe عند تسجيل الدخول",
       "finish": "تم",
       "panel": {
-        "name": "Handy",
+        "name": "MeetScribe",
         "ready": "جاهز",
         "languages": "اللغات",
         "model": "نموذج الكلام",
@@ -327,7 +330,7 @@
     "general": {
       "title": "عام",
       "shortcut": {
-        "title": "اختصارات Handy",
+        "title": "اختصارات MeetScribe",
         "description": "إعداد اختصارات لوحة المفاتيح لبدء تسجيل التفريغ الصوتي",
         "loading": "جاري تحميل الاختصارات...",
         "none": "لا توجد اختصارات مجهزة",
@@ -345,6 +348,10 @@
           "transcribe_with_post_process": {
             "name": "مفتاح المعالجة اللاحقة",
             "description": "اختياري: مفتاح اختصار مخصص يطبق دائماً المعالجة اللاحقة بالذكاء الاصطناعي على التفريغ الصوتي."
+          },
+          "toggle_meeting": {
+            "name": "Meeting Shortcut",
+            "description": "Starts or stops a meeting transcript with speaker labels."
           }
         },
         "errors": {
@@ -360,7 +367,7 @@
       },
       "preferredLanguages": {
         "title": "اللغات المفضلة",
-        "description": "اللغات التي تتحدثها. يستخدمها Handy للتوصية بالنماذج.",
+        "description": "اللغات التي تتحدثها. يستخدمها MeetScribe للتوصية بالنماذج.",
         "noMatch": "لا توجد لغة تطابق «{{query}}»",
         "weak": "لا يوجد نموذج يتعرف على {{languages}} جيدًا بعد."
       },
@@ -387,17 +394,17 @@
         "fits": "للغاتك",
         "untested": "غير مختبرة"
       },
-      "untestedNote": "لم تُختبر مع Handy. قد تكون أبطأ أو ترتكب أخطاء أكثر.",
+      "untestedNote": "لم تُختبر مع MeetScribe. قد تكون أبطأ أو ترتكب أخطاء أكثر.",
       "untestedHidden_one": "نموذج آخر ({{count}}) غير مضبوط للإملاء. ابحث للعثور عليه.",
       "untestedHidden_other": "{{count}} من النماذج الأخرى غير مضبوطة للإملاء. ابحث للعثور على أحدها.",
-      "emptyYours": "لا توجد نماذج بعد. اختر واحدًا أدناه: يُنزَّل ثم يستخدمه Handy.",
+      "emptyYours": "لا توجد نماذج بعد. اختر واحدًا أدناه: يُنزَّل ثم يستخدمه MeetScribe.",
       "showMore": "عرض {{count}} أخرى",
       "showFewer": "عرض أقل",
       "download": "تنزيل واستخدام",
       "downloadingThenUse": "{{percent}}% من {{total}}، ثم يتم التبديل",
       "loading": "جارٍ التحميل…",
       "deleteAsk": "حذف {{name}}؟ سيحرر {{size}}.",
-      "deleteAskActive": "حذف {{name}}؟ لن يستطيع Handy التفريغ الصوتي حتى تختار نموذجًا آخر.",
+      "deleteAskActive": "حذف {{name}}؟ لن يستطيع MeetScribe التفريغ الصوتي حتى تختار نموذجًا آخر.",
       "cancel": "إلغاء",
       "deleteModel": "حذف {{name}}",
       "cancelDownload": "إيقاف تنزيل {{name}}",
@@ -411,7 +418,7 @@
         "marks": "? لم يُقَس بعد. — لا يسمع تلك اللغة."
       },
       "retiredNotice": {
-        "title": "النماذج القديمة لم تعد تعمل مع Handy",
+        "title": "النماذج القديمة لم تعد تعمل مع MeetScribe",
         "description": "إنها تشغل {{size}} على جهاز الكمبيوتر الخاص بك.",
         "delete": "حذف النماذج",
         "deleted": "تم حذف النماذج القديمة",
@@ -419,7 +426,7 @@
       },
       "rescan": {
         "label": "إعادة الفحص",
-        "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج Handy"
+        "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج MeetScribe"
       }
     },
     "languages": {
@@ -485,11 +492,11 @@
       },
       "autostart": {
         "label": "التشغيل عند بدء التشغيل",
-        "description": ".بدء تشغيل Handy تلقائياً عند تسجيل الدخول إلى جهاز الكمبيوتر الخاص بك"
+        "description": ".بدء تشغيل MeetScribe تلقائياً عند تسجيل الدخول إلى جهاز الكمبيوتر الخاص بك"
       },
       "showTrayIcon": {
         "label": "إظهار أيقونة شريط النظام",
-        "description": ".عرض أيقونة Handy في شريط النظام"
+        "description": ".عرض أيقونة MeetScribe في شريط النظام"
       },
       "overlay": {
         "style": {
@@ -720,7 +727,7 @@
       },
       "updateChecks": {
         "label": "التحقق من وجود تحديثات",
-        "description": "التحقق تلقائياً من وجود إصدارات جديدة من Handy",
+        "description": "التحقق تلقائياً من وجود إصدارات جديدة من MeetScribe",
         "lockedDescription": "معطّل بواسطة إعدادات النظام (HANDY_DISABLE_UPDATER)"
       },
       "whatsNewPreview": {
@@ -825,7 +832,7 @@
       },
       "keyboardDiagnostic": {
         "title": "تشخيص لوحة المفاتيح",
-        "description": "يتحقق مما إذا كانت أحداث لوحة المفاتيح تصل إلى Handy. يُسجَّل عدد الأحداث فقط — ولا تُسجَّل أبدًا المفاتيح التي تضغط عليها.",
+        "description": "يتحقق مما إذا كانت أحداث لوحة المفاتيح تصل إلى MeetScribe. يُسجَّل عدد الأحداث فقط — ولا تُسجَّل أبدًا المفاتيح التي تضغط عليها.",
         "run": "تشغيل تشخيص لمدة 10 ثوانٍ",
         "running": "جارٍ الاستماع… اضغط اختصارك عدة مرات (مثل Option+Space)",
         "secureInputLabel": "Secure Input",
@@ -839,7 +846,7 @@
         "mouse": "الماوس",
         "verdictBlocked": "يحجب Secure Input أحداث المفاتيح — لا يمكن للاختصارات التي تتضمن مفتاحًا عاديًا أن تعمل حتى تُحلّ المشكلة.",
         "verdictSuspicious": "وصلت أحداث مفاتيح التعديل لكن لم يصل أي حدث مفتاح — هناك شيء يمنع المفاتيح رغم أن Secure Input يظهر معطلاً. يُرجى الإبلاغ عن ذلك على GitHub.",
-        "verdictOk": "أحداث المفاتيح تصل إلى Handy بشكل طبيعي.",
+        "verdictOk": "أحداث المفاتيح تصل إلى MeetScribe بشكل طبيعي.",
         "verdictNoEvents": "لم يُسجَّل أي حدث — هل ضغطت أي مفاتيح أثناء الاختبار؟",
         "failed": "فشل التشخيص: {{error}}"
       }
@@ -848,15 +855,15 @@
       "title": "حول",
       "version": {
         "title": "الإصدار",
-        "description": "الإصدار الحالي من Handy"
+        "description": "الإصدار الحالي من MeetScribe"
       },
       "whatsNewUpdates": {
         "label": "إظهار الجديد",
-        "description": "إظهار ملاحظات الإصدار بعد تحديثات Handy"
+        "description": "إظهار ملاحظات الإصدار بعد تحديثات MeetScribe"
       },
       "appDataDirectory": {
         "title": "مجلد بيانات التطبيق",
-        "description": "الموقع الذي يخزن فيه Handy بياناته"
+        "description": "الموقع الذي يخزن فيه MeetScribe بياناته"
       },
       "sourceCode": {
         "title": "كود المصدر",
@@ -865,7 +872,7 @@
       },
       "supportDevelopment": {
         "title": "دعم التطوير",
-        "description": "ساعدنا في مواصلة بناء Handy",
+        "description": "ساعدنا في مواصلة بناء MeetScribe",
         "button": "تبرع"
       },
       "acknowledgments": {
@@ -873,8 +880,53 @@
         "ggml": {
           "title": "ggml",
           "description": "استنتاج عالي الأداء لنموذج التعرف التلقائي على الكلام Whisper من OpenAI",
-          "details": ".يستخدم Handy برنامج ggml لمعالجة سريعة ومحلية لتحويل الكلام إلى نص. شكراً للعمل الرائع الذي قام به Georgi Gerganov والمساهمون"
+          "details": ".يستخدم MeetScribe برنامج ggml لمعالجة سريعة ومحلية لتحويل الكلام إلى نص. شكراً للعمل الرائع الذي قام به Georgi Gerganov والمساهمون"
         }
+      }
+    },
+    "meeting": {
+      "title": "Meetings",
+      "open": {
+        "label": "Meeting window",
+        "description": "Open the live meeting transcript window.",
+        "button": "Open"
+      },
+      "maxSpeakers": {
+        "label": "Maximum speakers",
+        "description": "Upper bound on distinct speakers in a transcript (1–8). Accuracy drops above about four."
+      },
+      "latency": {
+        "label": "Speaker latency",
+        "description": "How much audio the diarizer waits for before labelling speakers. Longer is more accurate, shorter feels more live.",
+        "ultra_low": "0.3 s (fastest)",
+        "very_low": "0.6 s",
+        "low": "1 s (recommended)",
+        "high": "5 s (most stable)"
+      },
+      "outputDir": {
+        "label": "Output folder",
+        "description": "Where transcripts are saved. Empty uses Documents/MeetScribe.",
+        "placeholder": "Documents/MeetScribe"
+      },
+      "saveAudio": {
+        "label": "Save meeting audio",
+        "description": "Also keep a WAV recording next to the transcript. Off by default."
+      },
+      "writeJson": {
+        "label": "Word-level JSON",
+        "description": "Write a .json file with word timings and speakers next to the Markdown transcript."
+      },
+      "asrModel": {
+        "label": "Meeting transcription model",
+        "description": "Speech model used during meetings. Parakeet models give word-level timing (best speaker alignment); Whisper gives sentence-level timing.",
+        "same": "Same as dictation"
+      },
+      "backend": {
+        "label": "Diarizer",
+        "description": "Engine that detects who is speaking.",
+        "python_sidecar": "Nemotron 3 Diarization (Python prototype)",
+        "auto": "Automatic (native if available)",
+        "native": "Nemotron 3 Diarization (native, Metal)"
       }
     }
   },
@@ -894,7 +946,7 @@
     "portableUpdateBrowseButton": "فتح GitHub Releases"
   },
   "whatsNew": {
-    "title": "الجديد في Handy v{{version}}"
+    "title": "الجديد في MeetScribe v{{version}}"
   },
   "common": {
     "loading": "جاري التحميل...",
@@ -925,11 +977,11 @@
   },
   "appLanguage": {
     "title": "لغة التطبيق",
-    "description": "تغيير لغة واجهة Handy"
+    "description": "تغيير لغة واجهة MeetScribe"
   },
   "theme": {
     "title": "سمة التطبيق",
-    "description": "اختر ما إذا كان Handy يتبع مظهر النظام أو يبقى فاتحًا أو داكنًا",
+    "description": "اختر ما إذا كان MeetScribe يتبع مظهر النظام أو يبقى فاتحًا أو داكنًا",
     "options": {
       "system": "النظام",
       "light": "فاتح",
@@ -951,5 +1003,33 @@
     "learnMore": "كيفية الإصلاح",
     "recorderBlocked": "لا يمكن تسجيل الاختصارات الآن — يحجب Secure Input في macOS أحداث المفاتيح. عالج تحذير Secure Input أولاً.",
     "dismiss": "تجاهل"
+  },
+  "meeting": {
+    "title": "Meeting",
+    "start": "Start meeting",
+    "stop": "Stop meeting",
+    "starting": "Starting… loading models",
+    "stopping": "Finishing and saving…",
+    "idleHint": "Start a meeting to get a live transcript with speaker labels. Everything stays on this Mac.",
+    "waiting": "Listening… text appears a moment after each sentence.",
+    "speakers": "Speakers",
+    "noSpeakers": "No speakers yet",
+    "renameHint": "Click a name to rename that speaker everywhere",
+    "renamePlaceholder": "Name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "savedTo": "Transcript saved",
+    "reveal": "Show in folder",
+    "openFolder": "Open meetings folder",
+    "errorTitle": "Meeting problem",
+    "dismiss": "Dismiss",
+    "asrDelay": "Speech → text {{ms}} ms",
+    "diarizerLag": "speakers settle after {{ms}} ms",
+    "utterances": "{{count}} utterances",
+    "copy": "Copy transcript",
+    "copied": "Copied",
+    "languageAuto": "Automatic",
+    "languageHint": "Language spoken in the meeting. Pick one if speech is transcribed in the wrong language; applies from the next sentence.",
+    "languageIgnored": "The current meeting model (Parakeet TDT) always detects the language itself, so this choice has no effect. To force a language, pick Nemotron 3.5 ASR or a Whisper model under Settings → Meetings → Meeting transcription model."
   }
 }
