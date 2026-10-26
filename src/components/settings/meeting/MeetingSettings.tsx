@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   commands,
+  type DiarizerBackend,
   type LatencyProfile,
   type MeetingSettings as MeetingSettingsT,
   type ModelInfo,
@@ -15,6 +16,7 @@ import { Button } from "../../ui/Button";
 import { ShortcutInput } from "../ShortcutInput";
 
 const LATENCIES: LatencyProfile[] = ["ultra_low", "very_low", "low", "high"];
+const BACKENDS: DiarizerBackend[] = ["auto", "native", "python_sidecar"];
 
 /** Meeting-mode settings; stored by the backend in their own file. */
 export const MeetingSettings: React.FC = () => {
@@ -101,6 +103,20 @@ export const MeetingSettings: React.FC = () => {
               ...models.map((m) => ({ value: m.id, label: m.name })),
             ]}
             onSelect={(v) => update({ asr_model: v || null })}
+          />
+        </SettingContainer>
+        <SettingContainer
+          title={t("settings.meeting.backend.label")}
+          description={t("settings.meeting.backend.description")}
+          grouped={true}
+        >
+          <Dropdown
+            selectedValue={settings.diarizer_backend}
+            options={BACKENDS.map((b) => ({
+              value: b,
+              label: t(`settings.meeting.backend.${b}`),
+            }))}
+            onSelect={(v) => update({ diarizer_backend: v as DiarizerBackend })}
           />
         </SettingContainer>
       </SettingsGroup>

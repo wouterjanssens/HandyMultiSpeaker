@@ -924,7 +924,9 @@
       "backend": {
         "label": "Diarizer",
         "description": "Engine die bepaalt wie er spreekt.",
-        "python_sidecar": "Nemotron 3 Diarization (Python-prototype)"
+        "python_sidecar": "Nemotron 3 Diarization (Python-prototype)",
+        "auto": "Automatisch (native indien beschikbaar)",
+        "native": "Nemotron 3 Diarization (native, Metal)"
       }
     }
   },

@@ -1166,6 +1166,14 @@ export type ClipboardHandling = "dont_modify" | "copy_to_clipboard"
 export type CustomSounds = { start: boolean; stop: boolean }
 export type DiarizerBackend = 
 /**
+ * Native when this build linked NeMo-Speech.cpp, otherwise the Python sidecar.
+ */
+"auto" | 
+/**
+ * NeMo-Speech.cpp in-process (ggml/Metal).
+ */
+"native" | 
+/**
  * Temporary: Hugging Face reference implementation in a Python process (dev builds only).
  */
 "python_sidecar"

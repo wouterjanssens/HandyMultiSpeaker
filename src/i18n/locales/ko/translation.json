@@ -924,7 +924,9 @@
       "backend": {
         "label": "Diarizer",
         "description": "Engine that detects who is speaking.",
-        "python_sidecar": "Nemotron 3 Diarization (Python prototype)"
+        "python_sidecar": "Nemotron 3 Diarization (Python prototype)",
+        "auto": "Automatic (native if available)",
+        "native": "Nemotron 3 Diarization (native, Metal)"
       }
     }
   },
