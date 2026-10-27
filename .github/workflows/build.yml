@@ -477,10 +477,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_ID: ${{ inputs.sign-binaries && secrets.APPLE_ID || '' }}
-          APPLE_ID_PASSWORD: ${{ inputs.sign-binaries && secrets.APPLE_ID_PASSWORD || '' }}
-          APPLE_PASSWORD: ${{ inputs.sign-binaries && secrets.APPLE_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ inputs.sign-binaries && secrets.APPLE_TEAM_ID || '' }}
+          # meetscribe: APPLE_ID / APPLE_ID_PASSWORD / APPLE_PASSWORD / APPLE_TEAM_ID are
+          # not passed: the fork has no Apple Developer account, and even empty values
+          # make Tauri attempt notarization ("Team ID must be at least 3 characters").
           # meetscribe: APPLE_CERTIFICATE / APPLE_CERTIFICATE_PASSWORD are deliberately
           # not passed (not even empty - Tauri treats a set-but-empty variable as a
           # certificate to import). The "import Apple Developer Certificate" step already
