@@ -11,6 +11,8 @@ const STORE_PATH: &str = "meeting_settings.json";
 /// Language hints offered in the meeting window.
 pub const MEETING_LANGUAGES: &[&str] = &["auto", "en", "nl", "da", "fr"];
 const STORE_KEY: &str = "meeting";
+/// Set once the meetings saved before they were listed in History were imported.
+const HISTORY_IMPORTED_KEY: &str = "history_imported";
 
 /// Diarizer streaming latency profile (input buffer before a chunk is labelled).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -127,6 +129,26 @@ pub fn save(app: &AppHandle, settings: &MeetingSettings) -> Result<(), String> {
         serde_json::to_value(settings).map_err(|e| e.to_string())?,
     );
     store.save().map_err(|e| e.to_string())
+}
+
+/// True exactly once: when saved meetings should be imported into History. Recorded up front, so
+/// a failure to record it never imports them twice, and entries deleted later stay deleted.
+pub fn claim_history_import(app: &AppHandle) -> bool {
+    let result = app
+        .store(store_path())
+        .map_err(|e| e.to_string())
+        .and_then(|store| {
+            if store.get(HISTORY_IMPORTED_KEY).is_some() {
+                return Ok(false);
+            }
+            store.set(HISTORY_IMPORTED_KEY, true);
+            store.save().map_err(|e| e.to_string())?;
+            Ok(true)
+        });
+    result.unwrap_or_else(|e| {
+        log::error!("Skipping the meeting import into history: {e}");
+        false
+    })
 }
 
 #[tauri::command]

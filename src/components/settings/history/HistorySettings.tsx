@@ -16,6 +16,7 @@ import {
   RotateCcw,
   Star,
   Trash2,
+  Users,
   X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -369,6 +370,7 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
     if (!retrying) setCancelling(false);
   }, [retrying]);
   const hasTranscription = entry.transcription_text.trim().length > 0;
+  const meetingPath = entry.meeting_path;
   const folded = hasTranscription && !retrying && !expanded;
 
   // Offer "Show more" only when the folded text is actually cut off.
@@ -411,6 +413,13 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
     }
   };
 
+  const handleRevealMeeting = async () => {
+    const result = await commands.meetingRevealOutput(meetingPath);
+    if (result.status !== "ok") {
+      toast.error(t("meeting.fileMissing"));
+    }
+  };
+
   const formattedDate = formatDateTime(String(entry.timestamp), i18n.language);
 
   let progressText = t("settings.history.transcribing");
@@ -427,14 +436,24 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
       <div className="flex justify-between items-center gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <p className="text-sm font-medium shrink-0">{formattedDate}</p>
-          {entry.source_name && (
+          {meetingPath ? (
             <span
               className="flex items-center gap-1 min-w-0 text-sm text-ink-3"
-              title={entry.source_name}
+              title={entry.source_name ?? undefined}
             >
-              <FileAudio width={14} height={14} className="shrink-0" />
-              <span className="truncate">{entry.source_name}</span>
+              <Users width={14} height={14} className="shrink-0" />
+              <span className="truncate">{t("meeting.title")}</span>
             </span>
+          ) : (
+            entry.source_name && (
+              <span
+                className="flex items-center gap-1 min-w-0 text-sm text-ink-3"
+                title={entry.source_name}
+              >
+                <FileAudio width={14} height={14} className="shrink-0" />
+                <span className="truncate">{entry.source_name}</span>
+              </span>
+            )
           )}
         </div>
         <div className="flex items-center shrink-0">
@@ -464,7 +483,15 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
               fill={entry.saved ? "currentColor" : "none"}
             />
           </IconButton>
-          {retrying ? (
+          {meetingPath ? (
+            // A meeting's speakers can't be recovered by transcribing it again.
+            <IconButton
+              onClick={handleRevealMeeting}
+              title={t("meeting.reveal")}
+            >
+              <FolderOpen width={16} height={16} />
+            </IconButton>
+          ) : retrying ? (
             <IconButton
               onClick={() => {
                 setCancelling(true);
@@ -526,7 +553,10 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
           {retrying
             ? progressText
             : hasTranscription
-              ? entry.transcription_text
+              ? meetingPath
+                ? // Saved as Markdown; shown as plain text.
+                  entry.transcription_text.replace(/\*\*/g, "")
+                : entry.transcription_text
               : entry.source_name
                 ? // Cancelled, interrupted by a quit, or failed.
                   t("settings.history.notTranscribed")
@@ -545,7 +575,9 @@ const HistoryEntryComponent: React.FC<HistoryEntryProps> = ({
         )}
       </div>
 
-      <AudioPlayer onLoadRequest={handleLoadAudio} className="w-full" />
+      {entry.file_name && (
+        <AudioPlayer onLoadRequest={handleLoadAudio} className="w-full" />
+      )}
     </div>
   );
 };

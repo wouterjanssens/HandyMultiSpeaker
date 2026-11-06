@@ -7,7 +7,7 @@
 //! Known gap: frames dropped by a capture-ring overrun are not visible per chunk, so such a gap
 //! shifts everything after it (both workers equally); it is logged at stop.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
 use std::sync::{Arc, Mutex};
@@ -28,6 +28,7 @@ use transcribe_cpp::Transcript;
 
 use super::settings::MeetingSettings;
 use crate::managers::audio::AudioRecordingManager;
+use crate::managers::history::HistoryManager;
 use crate::managers::transcription::TranscriptionManager;
 
 pub const MEETING_BINDING: &str = "toggle_meeting";
@@ -280,7 +281,9 @@ impl Session {
             pct(0.95),
             shared.stats.max_asr_delay_ms,
         );
-        write_outputs(app, &self.settings, &shared)
+        let output = write_outputs(app, &self.settings, &shared);
+        add_to_history(app, &shared, &output);
+        output
     }
 }
 
@@ -375,6 +378,26 @@ fn write_outputs(app: &AppHandle, settings: &MeetingSettings, shared: &Shared) -
         out.error = Some(format!("{e:#}"));
     }
     out
+}
+
+/// Lists the saved meeting in History. A meeting in which nothing was said isn't worth a row.
+fn add_to_history(app: &AppHandle, shared: &Shared, output: &MeetingOutput) {
+    let Some(transcript_path) = &output.markdown_path else {
+        return;
+    };
+    let transcript = export::transcript_text(shared.turns.turns(), &shared.speakers);
+    let transcript = transcript.trim_end();
+    if transcript.is_empty() {
+        return;
+    }
+    if let Err(e) = app.state::<Arc<HistoryManager>>().save_meeting_entry(
+        (shared.started_epoch_ms / 1000) as i64,
+        transcript.to_string(),
+        Path::new(transcript_path),
+        output.audio_path.as_deref().map(Path::new),
+    ) {
+        log::error!("Failed to add the meeting to history: {e:#}");
+    }
 }
 
 /// `path`, or `path` with ` (2)`, ` (3)`… if it exists (two meetings started in one minute).

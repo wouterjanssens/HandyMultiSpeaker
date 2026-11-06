@@ -1195,7 +1195,13 @@ export type HistoryEntry = { id: number; file_name: string; timestamp: number; s
  * The name of the file this entry was transcribed from; `None` for a
  * dictation.
  */
-source_name: string | null }
+source_name: string | null; 
+/**
+ * The saved transcript of a meeting; `None` for anything else. A meeting
+ * can't be transcribed again, and its files outlive the entry. Its
+ * `file_name` is the absolute path of its audio, empty when none was kept.
+ */
+meeting_path: string | null }
 export type HistoryUpdatePayload = { action: "added"; entry: HistoryEntry } | { action: "updated"; entry: HistoryEntry } | { action: "deleted"; id: number } | { action: "toggled"; id: number }
 /**
  * Result of changing keyboard implementation
