@@ -1,8 +1,9 @@
 name: "Release"
 
-# Two ways to trigger a release:
-#   1. Push a version tag:        git tag v1.0.0 && git push origin v1.0.0
-#   2. Run manually from GitHub:  Actions → "Release" → Run workflow → enter a tag
+# Releases are manual only. Nothing happens on push, and pushing a tag does not
+# trigger a build either. To release:
+#   gh workflow run release.yml -f tag=v1.0.0
+# or Actions → "Release" → Run workflow → enter a tag.
 #
 # The tag decides the app version (it is stamped into tauri.conf.json at build
 # time). The release is created as a draft, the macOS build uploads the .dmg,
@@ -14,9 +15,6 @@ name: "Release"
 # in tauri.conf.json, otherwise installed apps reject the update.
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
       tag:
@@ -36,7 +34,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          TAG="${{ github.event.inputs.tag }}"
           VERSION="${TAG#v}"
           # The updater compares versions as semver, so reject anything else.
           if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
