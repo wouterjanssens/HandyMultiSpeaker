@@ -1025,6 +1025,7 @@
     "cancel": "Annuleren",
     "savedTo": "Transcript opgeslagen",
     "reveal": "Toon in map",
+    "fileMissing": "Het transcript van deze vergadering staat niet meer in de map.",
     "openFolder": "Open map met vergaderingen",
     "errorTitle": "Probleem met de vergadering",
     "dismiss": "Sluiten",

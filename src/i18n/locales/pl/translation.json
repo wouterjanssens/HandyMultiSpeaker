@@ -1025,6 +1025,7 @@
     "cancel": "Cancel",
     "savedTo": "Transcript saved",
     "reveal": "Show in folder",
+    "fileMissing": "This meeting's transcript is no longer in its folder.",
     "openFolder": "Open meetings folder",
     "errorTitle": "Meeting problem",
     "dismiss": "Dismiss",

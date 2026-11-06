@@ -58,15 +58,32 @@ pub fn to_markdown<'a>(
         .map(|s| speakers.label(s))
         .collect();
     md.push_str(&format!("Speakers: {}\n\n", labels.join(", ")));
+    md.push_str(&transcript_text(turns, speakers));
+    md
+}
+
+/// The turns as the Markdown transcript lays them out, without its header.
+pub fn transcript_text<'a>(
+    turns: impl IntoIterator<Item = &'a Turn>,
+    speakers: &SpeakerMap,
+) -> String {
+    let mut text = String::new();
     for t in turns {
-        md.push_str(&format!(
+        text.push_str(&format!(
             "**{}** [{}]: {}\n\n",
             speakers.label(t.speaker),
             hms(t.start_ms),
             t.text
         ));
     }
-    md
+    text
+}
+
+/// The turns of a file written by [`to_markdown`], without its header.
+pub fn transcript_from_markdown(md: &str) -> &str {
+    md.split_once("\n\n")
+        .map_or("", |(_header, turns)| turns)
+        .trim_end()
 }
 
 #[derive(Serialize)]
@@ -170,6 +187,20 @@ mod tests {
                 tentative: false,
             }],
         }
+    }
+
+    #[test]
+    fn transcript_is_recovered_from_saved_markdown() {
+        let turns = [turn(0, Some(0), 0, "hallo"), turn(1, Some(1), 2_000, "dag")];
+        let speakers = SpeakerMap::new();
+        let md = to_markdown(&info(), turns.iter(), &speakers);
+        assert_eq!(
+            transcript_from_markdown(&md),
+            transcript_text(turns.iter(), &speakers).trim_end()
+        );
+        assert!(transcript_from_markdown(&md).starts_with("**"));
+        assert_eq!(transcript_from_markdown("# Meeting\nSpeakers: \n\n"), "");
+        assert_eq!(transcript_from_markdown(""), "");
     }
 
     fn info() -> MeetingInfo {

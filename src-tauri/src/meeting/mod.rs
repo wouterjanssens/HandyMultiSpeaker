@@ -272,6 +272,62 @@ fn stop(app: &AppHandle, m: Arc<MeetingManager>) {
     });
 }
 
+/// Start time of a meeting saved as `YYYY-MM-DD_HHMM_meeting[ (n)].md`, in seconds since the epoch.
+fn saved_meeting_timestamp(file_name: &str) -> Option<i64> {
+    let stem = file_name.strip_suffix(".md")?;
+    let (started, rest) = stem.split_once("_meeting")?;
+    if !(rest.is_empty() || rest.starts_with(" (")) {
+        return None;
+    }
+    chrono::NaiveDateTime::parse_from_str(started, "%Y-%m-%d_%H%M")
+        .ok()?
+        .and_local_timezone(chrono::Local)
+        .earliest()
+        .map(|t| t.timestamp())
+}
+
+/// Lists the meetings already in the output folder in History, the first time this version runs.
+pub fn import_saved_meetings_into_history(app: &AppHandle) {
+    if !settings::claim_history_import(app) {
+        return;
+    }
+    let dir = settings::load(app).resolved_output_dir(app);
+    let Ok(files) = std::fs::read_dir(&dir) else {
+        return;
+    };
+    let mut saved: Vec<(i64, std::path::PathBuf)> = files
+        .flatten()
+        .filter_map(|file| {
+            let timestamp = saved_meeting_timestamp(&file.file_name().to_string_lossy())?;
+            Some((timestamp, file.path()))
+        })
+        .collect();
+    saved.sort();
+
+    let history = app.state::<Arc<crate::managers::history::HistoryManager>>();
+    let mut imported = 0;
+    for (timestamp, path) in saved {
+        let contents = match std::fs::read_to_string(&path) {
+            Ok(contents) => contents,
+            Err(e) => {
+                log::warn!("Skipping {}: {e}", path.display());
+                continue;
+            }
+        };
+        let transcript = meeting_core::export::transcript_from_markdown(&contents);
+        if transcript.is_empty() {
+            continue;
+        }
+        let audio = path.with_extension("wav");
+        let audio = audio.is_file().then_some(audio.as_path());
+        match history.save_meeting_entry(timestamp, transcript.to_string(), &path, audio) {
+            Ok(_) => imported += 1,
+            Err(e) => log::error!("Failed to import {}: {e:#}", path.display()),
+        }
+    }
+    log::info!("Imported {imported} saved meetings into history");
+}
+
 /// Opens (or focuses) the meeting window.
 pub fn show_window(app: &AppHandle) {
     if let Some(w) = app.get_webview_window(WINDOW_LABEL) {
@@ -402,7 +458,13 @@ pub fn meeting_set_language(app: AppHandle, language: String) -> Result<String, 
 pub fn meeting_reveal_output(app: AppHandle, path: Option<String>) -> Result<(), String> {
     use tauri_plugin_opener::OpenerExt;
     let target = match path {
-        Some(p) => std::path::PathBuf::from(p),
+        Some(p) => {
+            let p = std::path::PathBuf::from(p);
+            if !p.exists() {
+                return Err(format!("{} no longer exists", p.display()));
+            }
+            p
+        }
         None => settings::load(&app).resolved_output_dir(&app),
     };
     if target.is_file() {
@@ -414,5 +476,35 @@ pub fn meeting_reveal_output(app: AppHandle, path: Option<String>) -> Result<(),
         app.opener()
             .open_path(target.to_string_lossy(), None::<&str>)
             .map_err(|e| e.to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_meeting_transcripts_have_a_saved_timestamp() {
+        let expected = chrono::NaiveDate::from_ymd_opt(2026, 10, 26)
+            .and_then(|d| d.and_hms_opt(16, 39, 0))
+            .and_then(|t| t.and_local_timezone(chrono::Local).earliest())
+            .map(|t| t.timestamp());
+        assert_eq!(
+            saved_meeting_timestamp("2026-10-26_1639_meeting.md"),
+            expected
+        );
+        assert_eq!(
+            saved_meeting_timestamp("2026-10-26_1639_meeting (2).md"),
+            expected
+        );
+        assert_eq!(
+            saved_meeting_timestamp("2026-10-26_1639_meeting.json"),
+            None
+        );
+        assert_eq!(
+            saved_meeting_timestamp("2026-10-26_1639_meeting notes.md"),
+            None
+        );
+        assert_eq!(saved_meeting_timestamp("notes_meeting.md"), None);
     }
 }

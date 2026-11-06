@@ -6,7 +6,7 @@ use rusqlite_migration::{MigrationDefinitionError, Migrations, M};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tauri::AppHandle;
 use tauri_specta::Event;
 
@@ -66,6 +66,10 @@ pub struct HistoryEntry {
     /// The name of the file this entry was transcribed from; `None` for a
     /// dictation.
     pub source_name: Option<String>,
+    /// The saved transcript of a meeting; `None` for anything else. A meeting
+    /// can't be transcribed again, and its files outlive the entry. Its
+    /// `file_name` is the absolute path of its audio, empty when none was kept.
+    pub meeting_path: Option<String>,
 }
 
 pub struct HistoryManager {
@@ -157,6 +161,13 @@ impl HistoryManager {
             )?;
             info!("Added the source_name column to transcription history");
         }
+        if !Self::has_column(conn, "meeting_path")? {
+            conn.execute(
+                "ALTER TABLE transcription_history ADD COLUMN meeting_path TEXT",
+                [],
+            )?;
+            info!("Added the meeting_path column to transcription history");
+        }
 
         Ok(())
     }
@@ -242,6 +253,7 @@ impl HistoryManager {
             post_process_prompt: row.get("post_process_prompt")?,
             post_process_requested: row.get("post_process_requested")?,
             source_name: row.get("source_name")?,
+            meeting_path: row.get("meeting_path")?,
         })
     }
 
@@ -270,6 +282,7 @@ impl HistoryManager {
             post_process_prompt,
             post_process_requested,
             source_name: None,
+            meeting_path: None,
         })?;
 
         self.cleanup_old_entries()?;
@@ -292,6 +305,35 @@ impl HistoryManager {
             post_process_prompt: None,
             post_process_requested: false,
             source_name: Some(source_name),
+            meeting_path: None,
+        })
+    }
+
+    /// Save the entry for a finished meeting whose transcript is at
+    /// `transcript_path`. Like a file, retention never removes it.
+    pub fn save_meeting_entry(
+        &self,
+        timestamp: i64,
+        transcript: String,
+        transcript_path: &Path,
+        audio_path: Option<&Path>,
+    ) -> Result<HistoryEntry> {
+        self.insert_entry(HistoryEntry {
+            id: 0,
+            file_name: audio_path
+                .map(|p| p.to_string_lossy().into_owned())
+                .unwrap_or_default(),
+            timestamp,
+            saved: false,
+            title: String::new(),
+            transcription_text: transcript,
+            post_processed_text: None,
+            post_process_prompt: None,
+            post_process_requested: false,
+            source_name: transcript_path
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned()),
+            meeting_path: Some(transcript_path.to_string_lossy().into_owned()),
         })
     }
 
@@ -310,8 +352,9 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source_name
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+                source_name,
+                meeting_path
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
                 &entry.file_name,
                 entry.timestamp,
@@ -322,6 +365,7 @@ impl HistoryManager {
                 &entry.post_process_prompt,
                 entry.post_process_requested,
                 &entry.source_name,
+                &entry.meeting_path,
             ],
         )?;
         entry.id = conn.last_insert_rowid();
@@ -369,7 +413,7 @@ impl HistoryManager {
 
         let entry = conn
             .query_row(
-                "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source_name
+                "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source_name, meeting_path
                  FROM transcription_history WHERE id = ?1",
                 params![id],
                 Self::map_history_entry,
@@ -516,44 +560,44 @@ impl HistoryManager {
         limit: Option<usize>,
     ) -> Result<PaginatedHistory> {
         let conn = self.get_connection()?;
-        let limit = limit.map(|l| l.min(100));
+        Self::get_history_entries_with_conn(&conn, cursor, limit)
+    }
 
-        let mut entries: Vec<HistoryEntry> = match (cursor, limit) {
-            (Some(cursor_id), Some(lim)) => {
-                let fetch_count = (lim + 1) as i64;
-                let mut stmt = conn.prepare(
-                    "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source_name
+    /// Newest first by time, not id: imported meetings have late ids but
+    /// their own, earlier times. `cursor` is the id of the last entry seen.
+    fn get_history_entries_with_conn(
+        conn: &Connection,
+        cursor: Option<i64>,
+        limit: Option<usize>,
+    ) -> Result<PaginatedHistory> {
+        const COLUMNS: &str = "id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source_name, meeting_path";
+        let limit = limit.map(|l| l.min(100));
+        // SQLite treats a negative LIMIT as no limit.
+        let fetch_count = limit.map_or(-1, |lim| (lim + 1) as i64);
+
+        let mut entries: Vec<HistoryEntry> = match cursor.filter(|_| limit.is_some()) {
+            Some(cursor_id) => {
+                let mut stmt = conn.prepare(&format!(
+                    "SELECT {COLUMNS}
                      FROM transcription_history
-                     WHERE id < ?1
-                     ORDER BY id DESC
-                     LIMIT ?2",
-                )?;
+                     WHERE (timestamp, id) < (SELECT timestamp, id FROM transcription_history WHERE id = ?1)
+                     ORDER BY timestamp DESC, id DESC
+                     LIMIT ?2"
+                ))?;
                 let result = stmt
                     .query_map(params![cursor_id, fetch_count], Self::map_history_entry)?
                     .collect::<std::result::Result<Vec<_>, _>>()?;
                 result
             }
-            (None, Some(lim)) => {
-                let fetch_count = (lim + 1) as i64;
-                let mut stmt = conn.prepare(
-                    "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source_name
+            None => {
+                let mut stmt = conn.prepare(&format!(
+                    "SELECT {COLUMNS}
                      FROM transcription_history
-                     ORDER BY id DESC
-                     LIMIT ?1",
-                )?;
+                     ORDER BY timestamp DESC, id DESC
+                     LIMIT ?1"
+                ))?;
                 let result = stmt
                     .query_map(params![fetch_count], Self::map_history_entry)?
-                    .collect::<std::result::Result<Vec<_>, _>>()?;
-                result
-            }
-            (_, None) => {
-                let mut stmt = conn.prepare(
-                    "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested, source_name
-                     FROM transcription_history
-                     ORDER BY id DESC",
-                )?;
-                let result = stmt
-                    .query_map([], Self::map_history_entry)?
                     .collect::<std::result::Result<Vec<_>, _>>()?;
                 result
             }
@@ -580,7 +624,8 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source_name
+                source_name,
+                meeting_path
              FROM transcription_history
              ORDER BY timestamp DESC
              LIMIT 1",
@@ -609,7 +654,8 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source_name
+                source_name,
+                meeting_path
              FROM transcription_history
              WHERE transcription_text != '' AND source_name IS NULL
              ORDER BY timestamp DESC
@@ -664,7 +710,8 @@ impl HistoryManager {
                 post_processed_text,
                 post_process_prompt,
                 post_process_requested,
-                source_name
+                source_name,
+                meeting_path
              FROM transcription_history
              WHERE id = ?1",
         )?;
@@ -678,7 +725,12 @@ impl HistoryManager {
         let conn = self.get_connection()?;
 
         // Get the entry to find the file name
-        if let Some(entry) = self.get_entry_by_id(id).await? {
+        // A meeting's files are the user's documents: they stay.
+        if let Some(entry) = self
+            .get_entry_by_id(id)
+            .await?
+            .filter(|entry| entry.meeting_path.is_none())
+        {
             // Delete the audio file first
             let file_path = self.get_audio_file_path(&entry.file_name);
             if file_path.exists() {
@@ -734,7 +786,8 @@ mod tests {
                 post_processed_text TEXT,
                 post_process_prompt TEXT,
                 post_process_requested BOOLEAN NOT NULL DEFAULT 0,
-                source_name TEXT
+                source_name TEXT,
+                meeting_path TEXT
             );",
         )
         .expect("create transcription_history table");
@@ -782,6 +835,56 @@ mod tests {
         // Opening it again changes nothing.
         HistoryManager::apply_migrations(&mut conn).expect("migrate again");
         assert_eq!(user_version(&conn), MIGRATIONS.len() as i32);
+    }
+
+    #[test]
+    fn migrating_adds_meeting_path_without_raising_the_version() {
+        let mut conn = Connection::open_in_memory().expect("open in-memory db");
+        HistoryManager::apply_migrations(&mut conn).expect("migrate");
+        assert!(HistoryManager::has_column(&conn, "meeting_path").expect("read table info"));
+        assert_eq!(user_version(&conn), MIGRATIONS.len() as i32);
+    }
+
+    #[test]
+    fn history_pages_run_by_time_even_when_ids_do_not() {
+        let conn = setup_conn();
+        insert_entry(&conn, 300, "newest", None);
+        insert_entry(&conn, 200, "imported later", None);
+        insert_entry(&conn, 100, "imported last", None);
+        insert_entry(&conn, 400, "newer still", None);
+
+        let page = |cursor| {
+            let page = HistoryManager::get_history_entries_with_conn(&conn, cursor, Some(2))
+                .expect("fetch page");
+            let timestamps: Vec<i64> = page.entries.iter().map(|e| e.timestamp).collect();
+            let last_id = page.entries.last().map(|e| e.id);
+            (timestamps, last_id, page.has_more)
+        };
+
+        let (first, cursor, has_more) = page(None);
+        assert_eq!(first, vec![400, 300]);
+        assert!(has_more);
+        let (second, _, has_more) = page(cursor);
+        assert_eq!(second, vec![200, 100]);
+        assert!(!has_more);
+    }
+
+    #[test]
+    fn get_latest_completed_entry_skips_meetings() {
+        let conn = setup_conn();
+        insert_entry(&conn, 100, "dictated", None);
+        conn.execute(
+            "INSERT INTO transcription_history (file_name, timestamp, saved, title, transcription_text, source_name, meeting_path)
+             VALUES ('', 200, 0, 'meeting', 'from a meeting', 'a.md', '/docs/a.md')",
+            [],
+        )
+        .expect("insert meeting entry");
+
+        let entry = HistoryManager::get_latest_completed_entry_with_conn(&conn)
+            .expect("fetch latest completed entry")
+            .expect("completed entry exists");
+
+        assert_eq!(entry.transcription_text, "dictated");
     }
 
     #[test]
