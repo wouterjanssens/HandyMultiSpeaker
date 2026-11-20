@@ -28,9 +28,16 @@ selection):
 | Notes                        | Responses API, `gpt-5.5`                           | after Stop → `…_notes.md`  |
 | Dictation                    | `gpt-transcribe`                                   | on release of the shortcut |
 
+Final speakers and notes only run for meetings on the OpenAI model, and never inside Stop: Stop
+saves the transcript (live speaker labels) at once and hands the rest to the meeting's
+post-processing worker, which runs the final speaker pass, rewrites the `.md`, `.json` and History
+entry, writes the final `.vtt`, then the notes, and only then the LLM clean-up and rename. Without
+"save audio" the final pass records to `meetscribe-*.wav` in the temp folder; it is deleted after
+the pass, and any left by a crash are removed at the next start.
+
 Code: `src-tauri/src/openai/` (client, settings, speaker tracker, notes),
 `src-tauri/src/meeting/cloud.rs` (live pipeline), `src-tauri/src/meeting/refine.rs` (final pass).
-Settings are stored in `meeting_settings.json` under the key `openai`.
+Settings are stored in `openai_settings.json` (key `openai`).
 
 API key lookup order: `OPENAI_API_KEY`, the OS keyring (`secret-tool lookup service openai account
 api-key` on Linux; keychain item `openai`/`api-key` on macOS), then the Post Processing → OpenAI key.

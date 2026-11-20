@@ -63,7 +63,7 @@
     "permissions": {
       "microphone": {
         "name": "Microphone",
-        "why": "So MeetScribe can hear you. Audio is turned into text on this computer and never uploaded."
+        "why": "So MeetScribe can hear you. Audio is turned into text on this computer and never uploaded when using local models."
       },
       "accessibility": {
         "name": "Accessibility",

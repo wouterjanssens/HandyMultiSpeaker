@@ -318,6 +318,7 @@ fn saved_meeting_timestamp(file_name: &str) -> Option<i64> {
 pub fn import_saved_meetings_into_history(app: &AppHandle) {
     // meetscribe: no meeting runs at startup, so a `current.vtt` is left over from a crash
     live::remove_stale_current(&settings::load(app).resolved_output_dir(app));
+    session::remove_stale_recordings();
     if !settings::claim_history_import(app) {
         return;
     }

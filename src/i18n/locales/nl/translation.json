@@ -63,7 +63,7 @@
     "permissions": {
       "microphone": {
         "name": "Microfoon",
-        "why": "Zodat MeetScribe je kan horen. Audio wordt op deze computer omgezet in tekst en nooit geüpload."
+        "why": "Zodat MeetScribe je kan horen. Audio wordt op deze computer omgezet in tekst en nooit geüpload bij gebruik van lokale modellen."
       },
       "accessibility": {
         "name": "Toegankelijkheid",

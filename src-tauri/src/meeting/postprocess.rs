@@ -43,6 +43,10 @@ pub struct Finish {
     /// What the meeting wrote, under its `…_meeting` names.
     pub output: MeetingOutput,
     pub history_id: Option<i64>,
+    /// meetscribe: the OpenAI final speaker pass and notes, for a meeting that ran on OpenAI.
+    pub cloud: Option<super::session::CloudFinish>,
+    /// meetscribe: the live `.vtt`, replaced by the final version once the speakers are final.
+    pub live_vtt: Option<PathBuf>,
 }
 
 /// `meeting:turn_cleaned`. `meeting` is the meeting's start time, which tells a finished
@@ -223,8 +227,13 @@ fn finish_meeting(
     app: &AppHandle,
     shared: &Arc<Mutex<Shared>>,
     failed: &mut HashSet<u32>,
-    finish: Finish,
+    mut finish: Finish,
 ) {
+    // meetscribe: final speakers, final `.vtt` and notes come first, whatever the mode
+    if super::session::finish_after_stop(app, shared, &mut finish) {
+        // the turns were replaced, so their ids (and earlier failures) no longer apply
+        failed.clear();
+    }
     let (meeting, mode) = {
         let s = shared.lock().unwrap();
         (s.started_epoch_ms as f64, s.post_process_mode)

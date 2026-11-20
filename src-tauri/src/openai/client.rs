@@ -132,8 +132,8 @@ impl Client {
         Self { http, key }
     }
 
-    /// Sends a request built by `make`, retrying once on rate limits, server errors and network
-    /// failures.
+    /// Sends a request built by `make`, up to three tries in all: rate limits, server errors and
+    /// network failures are tried again after a short pause (0.8 s, then 1.6 s).
     fn send(
         &self,
         what: &str,
