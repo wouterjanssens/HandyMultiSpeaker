@@ -5,9 +5,12 @@
 //! holds. Pure logic lives in the `meeting-core` crate; this module wires it to audio capture,
 //! the ASR engine, a diarizer backend, the meeting window and the output files.
 
+pub mod cloud;
 pub mod language;
+pub mod live;
 pub mod model;
 pub mod postprocess;
+pub mod refine;
 pub mod session;
 pub mod settings;
 pub mod sidecar;
@@ -191,6 +194,13 @@ fn create_diarizer(
     app: &AppHandle,
     settings: &MeetingSettings,
 ) -> anyhow::Result<Box<dyn StreamingDiarizer>> {
+    // meetscribe: OpenAI meetings label speakers in the cloud pipeline
+    let oa = crate::openai::settings::load(app);
+    if crate::openai::meetings_enabled(app) {
+        return Ok(Box::new(cloud::CloudDiarizer {
+            model: oa.diarize_model,
+        }));
+    }
     let profile = settings.latency_profile.sidecar_name();
     let native = match settings.diarizer_backend {
         DiarizerBackend::Auto => diarize::AVAILABLE,
@@ -208,6 +218,19 @@ fn create_diarizer(
             Duration::from_secs(300),
         )?))
     }
+}
+
+/// The OpenAI pipeline's config when meetings run on OpenAI (fails early without a key).
+fn cloud_config(app: &AppHandle) -> anyhow::Result<Option<cloud::CloudConfig>> {
+    let oa = crate::openai::settings::load(app);
+    if !crate::openai::meetings_enabled(app) {
+        return Ok(None);
+    }
+    Ok(Some(cloud::CloudConfig {
+        client: crate::openai::Client::from_app(app)?,
+        keywords: crate::settings::get_settings(app).custom_words,
+        settings: oa,
+    }))
 }
 
 /// Starts a meeting if none is running, otherwise stops it. Never blocks the caller.
@@ -236,8 +259,9 @@ fn start(app: &AppHandle, m: Arc<MeetingManager>) {
     let app = app.clone();
     std::thread::spawn(move || {
         let settings = settings::load(&app);
-        let result =
-            create_diarizer(&app, &settings).and_then(|d| Session::start(&app, settings, d));
+        let result = cloud_config(&app).and_then(|cloud| {
+            create_diarizer(&app, &settings).and_then(|d| Session::start(&app, settings, d, cloud))
+        });
         match result {
             Ok(session) => {
                 log::info!("Meeting started");
@@ -292,6 +316,9 @@ fn saved_meeting_timestamp(file_name: &str) -> Option<i64> {
 
 /// Lists the meetings already in the output folder in History, the first time this version runs.
 pub fn import_saved_meetings_into_history(app: &AppHandle) {
+    // meetscribe: no meeting runs at startup, so a `current.vtt` is left over from a crash
+    live::remove_stale_current(&settings::load(app).resolved_output_dir(app));
+    session::remove_stale_recordings();
     if !settings::claim_history_import(app) {
         return;
     }
@@ -419,8 +446,17 @@ pub fn meeting_rename_speaker(app: AppHandle, speaker: u8, name: String) -> Resu
         return Err("No meeting is running".into());
     };
     let mut s = session.shared.lock().unwrap();
+    let old_label = s.speakers.label(Some(speaker));
     s.speakers.rename(speaker, &name);
     let label = s.speakers.label(Some(speaker));
+    // meetscribe: earlier cues in the live transcript keep the old label; say so in the file
+    if label != old_label {
+        if let Some(live) = s.live.as_mut() {
+            live.note(&format!(
+                "{old_label} is now called {label}. This applies to earlier cues too."
+            ));
+        }
+    }
     let _ = app.emit(
         "meeting:speaker_renamed",
         SpeakerRenamed {
@@ -429,6 +465,18 @@ pub fn meeting_rename_speaker(app: AppHandle, speaker: u8, name: String) -> Resu
         },
     );
     Ok(label)
+}
+
+/// meetscribe: instructions (a SKILL.md) that let an AI read the meetings folder: the current
+/// meeting's live `.vtt` and the history. Shown in Settings → Meetings to copy into any LLM.
+const AI_INSTRUCTIONS: &str = include_str!("ai_instructions.md");
+
+/// The AI instructions with this machine's meetings folder filled in.
+#[tauri::command]
+#[specta::specta]
+pub fn meeting_ai_instructions(app: AppHandle) -> String {
+    let dir = settings::load(&app).resolved_output_dir(&app);
+    AI_INSTRUCTIONS.replace("{{DIR}}", &dir.to_string_lossy())
 }
 
 /// Sets the spoken-language hint; saved for next time and applied to a running meeting from its

@@ -11,6 +11,7 @@
 //! - [`segmenter`]: cuts the continuous stream into utterances for the ASR worker.
 //! - [`diarizer`]: the trait streaming diarizer backends implement.
 //! - [`export`]: Markdown transcript and word-level JSON sidecar.
+//! - [`vtt`]: WebVTT transcript, appended live while the meeting runs.
 
 pub mod activity;
 pub mod align;
@@ -20,6 +21,7 @@ pub mod export;
 pub mod segmenter;
 pub mod speakers;
 pub mod turns;
+pub mod vtt;
 
 pub use activity::SpeakerActivity;
 pub use align::{AlignConfig, AttributedWord, TimedWord};

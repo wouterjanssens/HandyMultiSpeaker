@@ -43,6 +43,10 @@ pub struct Finish {
     /// What the meeting wrote, under its `…_meeting` names.
     pub output: MeetingOutput,
     pub history_id: Option<i64>,
+    /// meetscribe: the OpenAI final speaker pass and notes, for a meeting that ran on OpenAI.
+    pub cloud: Option<super::session::CloudFinish>,
+    /// meetscribe: the live `.vtt`, replaced by the final version once the speakers are final.
+    pub live_vtt: Option<PathBuf>,
 }
 
 /// `meeting:turn_cleaned`. `meeting` is the meeting's start time, which tells a finished
@@ -223,8 +227,13 @@ fn finish_meeting(
     app: &AppHandle,
     shared: &Arc<Mutex<Shared>>,
     failed: &mut HashSet<u32>,
-    finish: Finish,
+    mut finish: Finish,
 ) {
+    // meetscribe: final speakers, final `.vtt` and notes come first, whatever the mode
+    if super::session::finish_after_stop(app, shared, &mut finish) {
+        // the turns were replaced, so their ids (and earlier failures) no longer apply
+        failed.clear();
+    }
     let (meeting, mode) = {
         let s = shared.lock().unwrap();
         (s.started_epoch_ms as f64, s.post_process_mode)
@@ -411,9 +420,12 @@ fn rename_outputs(output: &MeetingOutput, title: &str) -> Option<MeetingOutput> 
         return None;
     }
     log::info!("Meeting transcript renamed to {}", new_md.display());
-    let follow = |old: &Option<String>, extension: &str| {
+    let new_stem = new_md
+        .file_stem()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    let follow_to = |old: &Option<String>, new: PathBuf| {
         let old = old.as_ref()?;
-        let new = new_md.with_extension(extension);
         if new.exists() {
             return Some(old.clone());
         }
@@ -425,9 +437,17 @@ fn rename_outputs(output: &MeetingOutput, title: &str) -> Option<MeetingOutput> 
             }
         }
     };
+    let follow =
+        |old: &Option<String>, extension: &str| follow_to(old, new_md.with_extension(extension));
     Some(MeetingOutput {
         json_path: follow(&output.json_path, "json"),
         audio_path: follow(&output.audio_path, "wav"),
+        vtt_path: follow(&output.vtt_path, "vtt"),
+        // meetscribe: the OpenAI notes keep their `<transcript>_notes.md` name
+        notes_path: follow_to(
+            &output.notes_path,
+            new_md.with_file_name(format!("{new_stem}_notes.md")),
+        ),
         markdown_path: Some(new_md.to_string_lossy().into_owned()),
         error: output.error.clone(),
     })
@@ -533,6 +553,8 @@ mod tests {
         for name in [
             "2026-11-09_1602_meeting (2).md",
             "2026-11-09_1602_meeting (2).json",
+            "2026-11-09_1602_meeting (2).vtt",
+            "2026-11-09_1602_meeting (2)_notes.md",
         ] {
             std::fs::write(dir.join(name), "x").unwrap();
         }
@@ -541,6 +563,8 @@ mod tests {
                 markdown_path: Some(file("2026-11-09_1602_meeting (2).md")),
                 json_path: Some(file("2026-11-09_1602_meeting (2).json")),
                 audio_path: None,
+                notes_path: Some(file("2026-11-09_1602_meeting (2)_notes.md")),
+                vtt_path: Some(file("2026-11-09_1602_meeting (2).vtt")),
                 error: None,
             },
             "Budget-2027",
@@ -555,6 +579,16 @@ mod tests {
             Some(file("2026-11-09_1602_Budget-2027.json"))
         );
         assert!(dir.join("2026-11-09_1602_Budget-2027.json").is_file());
+        // meetscribe: the live transcript and the notes follow the transcript
+        assert_eq!(
+            renamed.vtt_path,
+            Some(file("2026-11-09_1602_Budget-2027.vtt"))
+        );
+        assert_eq!(
+            renamed.notes_path,
+            Some(file("2026-11-09_1602_Budget-2027_notes.md"))
+        );
+        assert!(dir.join("2026-11-09_1602_Budget-2027_notes.md").is_file());
         assert!(!dir.join("2026-11-09_1602_meeting (2).md").exists());
         std::fs::remove_dir_all(&dir).unwrap();
     }

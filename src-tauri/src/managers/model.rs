@@ -39,6 +39,9 @@ pub enum ModelSource {
     /// Already present on disk — a user-provided custom model, or one discovered
     /// in a shared cache. Nothing to download.
     Local,
+    /// meetscribe: runs on a remote service (OpenAI). Nothing to download or load; audio is
+    /// sent to the service when it transcribes.
+    Cloud,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -61,6 +64,13 @@ pub struct ModelInfo {
     pub is_custom: bool,            // Whether this is a user-provided custom model
     pub supports_streaming: bool, // Whether this model supports live streaming preview (transcribe-cpp)
     pub supports_language_detection: bool, // Whether the model can auto-detect language (gates the "Auto" option)
+}
+
+impl ModelInfo {
+    /// meetscribe: a cloud model has no file and no engine; it is always available.
+    pub fn is_cloud(&self) -> bool {
+        matches!(self.source, ModelSource::Cloud)
+    }
 }
 
 const CHINESE_LANGUAGE_CODE: &str = "zh";
@@ -1019,6 +1029,10 @@ impl ModelManager {
         // Auto-discover transcribe-cpp GGUF models already in the shared HF cache.
         Self::discover_hf_cache_models(&mut available_models);
 
+        // meetscribe: the OpenAI cloud model sits in the same list as the local ones
+        let cloud = crate::openai::model_info();
+        available_models.insert(cloud.id.clone(), cloud);
+
         let manager = Self {
             app_handle: app_handle.clone(),
             models_dir,
@@ -1266,6 +1280,13 @@ impl ModelManager {
         let mut vanished_models: Vec<String> = Vec::new();
 
         for model in models.values_mut() {
+            if model.is_cloud() {
+                // meetscribe: nothing on disk to check
+                model.is_downloaded = true;
+                model.is_downloading = false;
+                model.partial_size = 0;
+                continue;
+            }
             if let ModelSource::HuggingFace { repo_id, revision } = &model.source {
                 // A models-dir copy counts too: mirror-fallback downloads land
                 // there, and it makes manual drop-ins of catalog files work.
@@ -1428,12 +1449,13 @@ impl ModelManager {
         }
 
         // If no model is selected, pick the first downloaded one using the same
-        // ranked order the UI receives.
+        // ranked order the UI receives. A cloud model is never picked for the
+        // user: it sends audio off the machine, so it must be a deliberate choice.
         if settings.selected_model.is_empty() {
             if let Some(available_model) = self
                 .get_available_models()
                 .into_iter()
-                .find(|model| model.is_downloaded)
+                .find(|model| model.is_downloaded && !model.is_cloud())
             {
                 info!(
                     "Auto-selecting model: {} ({})",
@@ -2077,7 +2099,7 @@ impl ModelManager {
                     .download_hf_model(&model_info, repo_id.clone(), revision.clone())
                     .await;
             }
-            ModelSource::Local => {
+            ModelSource::Local | ModelSource::Cloud => {
                 return Err(anyhow::anyhow!("No download source for model"));
             }
         };
@@ -2180,6 +2202,10 @@ impl ModelManager {
             model_info.ok_or_else(|| anyhow::anyhow!("Model not found: {}", model_id))?;
 
         debug!("ModelManager: Found model info: {:?}", model_info);
+
+        if model_info.is_cloud() {
+            return Err(anyhow::anyhow!("{} has nothing to delete", model_info.name));
+        }
 
         if let ModelSource::HuggingFace { repo_id, revision } = &model_info.source {
             // Only this entry's own file, every cached copy of it. Other
@@ -2311,6 +2337,13 @@ impl ModelManager {
         let model_info = self
             .get_model_info(model_id)
             .ok_or_else(|| anyhow::anyhow!("Model not found: {}", model_id))?;
+
+        if model_info.is_cloud() {
+            return Err(anyhow::anyhow!(
+                "{} runs in the cloud and has no local file",
+                model_info.name
+            ));
+        }
 
         if !model_info.is_downloaded {
             return Err(anyhow::anyhow!("Model not available: {}", model_id));

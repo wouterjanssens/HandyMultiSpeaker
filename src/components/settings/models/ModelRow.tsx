@@ -7,6 +7,7 @@ import { ModelTableRow } from "@/components/shared/modelTable/ModelTableRow";
 import { formatModelSize } from "@/lib/utils/format";
 import { useModelStore } from "@/stores/modelStore";
 import { useModelsLocked } from "@/stores/transcriptionJobsStore";
+import { useOpenAiStore } from "@/stores/openaiStore";
 import {
   cancelDownload,
   pickModel,
@@ -28,6 +29,11 @@ export const ModelRow: React.FC<{ entry: Entry }> = ({ entry }) => {
   // Pressed while locked: this row says why nothing happened.
   const [told, setTold] = useState(false);
   const askRef = useRef<HTMLSpanElement>(null);
+  // meetscribe: a cloud model can't be deleted, and needs its API key
+  const cloud = entry.kind === "cloud";
+  const cloudKeyMissing = useOpenAiStore(
+    (s) => cloud && s.key?.found === false,
+  );
 
   useEffect(() => {
     if (!locked) setTold(false);
@@ -40,7 +46,7 @@ export const ModelRow: React.FC<{ entry: Entry }> = ({ entry }) => {
   const onDisk = place === "active" || place === "ready" || place === "loading";
   const on = place === "active";
   // While History transcribes, the model in use can't change or go away.
-  const deletable = onDisk && !(locked && on);
+  const deletable = onDisk && !cloud && !(locked && on);
   const inert = locked && place === "ready";
   const size = formatModelSize(entry.sizeMb);
   const download =
@@ -85,6 +91,8 @@ export const ModelRow: React.FC<{ entry: Entry }> = ({ entry }) => {
     </span>
   ) : (locked && on) || (told && inert) ? (
     t("modelSelector.lockedWhileTranscribing")
+  ) : cloudKeyMissing ? (
+    <span className="text-red-600">{t("openai.keyMissing")}</span>
   ) : place === "loading" ? (
     t("settings.models.loading")
   ) : place === "downloading" && target && !locked ? (

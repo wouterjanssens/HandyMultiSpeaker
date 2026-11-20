@@ -95,7 +95,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ progress, onContinue }) => {
       <div className="flex h-full min-h-0 flex-col items-center px-gutter pt-[6px] pb-[4px] text-center">
         <div className="mb-[10px] inline-flex items-end gap-[8px] leading-none">
           <Mascot size={54} animation={wave ? "wave" : null} />
-          <HandyTextLogo width={112} className="mb-[4px] block" />
+          <HandyTextLogo width={130} mark={false} className="mb-[4px]" />
         </div>
         <ScreenHeader
           title={t("onboarding.welcome.title")}

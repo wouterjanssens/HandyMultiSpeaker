@@ -35,7 +35,13 @@ export interface Lists {
   untested: Entry[];
 }
 
-const KIND_ORDER = { curated: 0, catalog: 0, custom: 1, legacy: 2 } as const;
+const KIND_ORDER = {
+  curated: 0,
+  catalog: 0,
+  cloud: 1,
+  custom: 2,
+  legacy: 3,
+} as const;
 
 /** Every model on the page, graded for `spoken_languages`, in sections. */
 export const useModelEntries = () => {

@@ -7,6 +7,11 @@ import {
   type MeetingSettings as MeetingSettingsT,
   type ModelInfo,
 } from "@/bindings";
+import { useOpenAiStore } from "@/stores/openaiStore";
+import { useModelStore } from "@/stores/modelStore";
+import { MeetingButton } from "../../meeting/MeetingButton";
+import { AiInstructions } from "./AiInstructions";
+import { OpenAiSettings, withCurrent } from "../models/OpenAiSettings";
 import { SettingsGroup } from "../../ui/SettingsGroup";
 import { SettingContainer } from "../../ui/SettingContainer";
 import { Dropdown } from "../../ui/Dropdown";
@@ -17,6 +22,54 @@ import { ShortcutInput } from "../ShortcutInput";
 
 const LATENCIES: LatencyProfile[] = ["ultra_low", "very_low", "low", "high"];
 const BACKENDS: DiarizerBackend[] = ["auto", "native", "python_sidecar"];
+const NOTES_MODELS = ["gpt-5.5", "gpt-5.4-mini"];
+
+/** meetscribe: what OpenAI adds to a meeting (speaker pass, notes). */
+const OpenAiMeetingGroup: React.FC = () => {
+  const { t } = useTranslation();
+  const oa = useOpenAiStore((s) => s.settings);
+  const load = useOpenAiStore((s) => s.load);
+  const update = useOpenAiStore((s) => s.update);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (!oa) return null;
+
+  return (
+    <SettingsGroup
+      title={t("settings.meeting.openai.title")}
+      description={t("settings.meeting.openai.description")}
+    >
+      <ToggleSwitch
+        checked={oa.final_pass}
+        onChange={(v) => update({ final_pass: v })}
+        label={t("settings.meeting.openai.finalPass.label")}
+        description={t("settings.meeting.openai.finalPass.description")}
+        grouped={true}
+      />
+      <ToggleSwitch
+        checked={oa.notes}
+        onChange={(v) => update({ notes: v })}
+        label={t("settings.meeting.openai.notes.label")}
+        description={t("settings.meeting.openai.notes.description")}
+        grouped={true}
+      />
+      <SettingContainer
+        title={t("settings.meeting.openai.notesModel.label")}
+        description={t("settings.meeting.openai.notesModel.description")}
+        grouped={true}
+      >
+        <Dropdown
+          selectedValue={oa.notes_model}
+          options={withCurrent(NOTES_MODELS, oa.notes_model)}
+          onSelect={(v) => update({ notes_model: v })}
+        />
+      </SettingContainer>
+    </SettingsGroup>
+  );
+};
 
 /** Meeting-mode settings; stored by the backend in their own file. */
 export const MeetingSettings: React.FC = () => {
@@ -24,6 +77,7 @@ export const MeetingSettings: React.FC = () => {
   const [settings, setSettings] = useState<MeetingSettingsT | null>(null);
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [outputDir, setOutputDir] = useState("");
+  const dictationModel = useModelStore((s) => s.currentModel);
 
   useEffect(() => {
     commands.getMeetingSettings().then((s) => {
@@ -49,23 +103,30 @@ export const MeetingSettings: React.FC = () => {
 
   if (!settings) return null;
 
+  // meetscribe: meetings run on OpenAI when it is the meeting model, or when they follow the
+  // dictation model and that is OpenAI
+  const cloudMeetings = (settings.asr_model ?? dictationModel) === "openai";
+
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
-      <SettingsGroup title={t("settings.meeting.title")}>
-        <ShortcutInput shortcutId="toggle_meeting" grouped={true} />
-        <SettingContainer
-          title={t("settings.meeting.open.label")}
-          description={t("settings.meeting.open.description")}
-          grouped={true}
-        >
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-line px-4 py-4">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold">{t("meeting.title")}</h2>
+          <p className="text-sm text-ink-3">{t("meeting.startHint")}</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
           <Button
-            size="sm"
+            size="md"
             variant="secondary"
             onClick={() => commands.meetingOpenWindow()}
           >
-            {t("settings.meeting.open.button")}
+            {t("meeting.openWindow")}
           </Button>
-        </SettingContainer>
+          <MeetingButton size="md" />
+        </div>
+      </div>
+      <SettingsGroup title={t("settings.meeting.title")}>
+        <ShortcutInput shortcutId="toggle_meeting" grouped={true} />
         <Slider
           value={settings.max_speakers}
           min={1}
@@ -77,20 +138,22 @@ export const MeetingSettings: React.FC = () => {
           grouped={true}
           formatValue={(v) => v.toString()}
         />
-        <SettingContainer
-          title={t("settings.meeting.latency.label")}
-          description={t("settings.meeting.latency.description")}
-          grouped={true}
-        >
-          <Dropdown
-            selectedValue={settings.latency_profile}
-            options={LATENCIES.map((l) => ({
-              value: l,
-              label: t(`settings.meeting.latency.${l}`),
-            }))}
-            onSelect={(v) => update({ latency_profile: v as LatencyProfile })}
-          />
-        </SettingContainer>
+        {!cloudMeetings && (
+          <SettingContainer
+            title={t("settings.meeting.latency.label")}
+            description={t("settings.meeting.latency.description")}
+            grouped={true}
+          >
+            <Dropdown
+              selectedValue={settings.latency_profile}
+              options={LATENCIES.map((l) => ({
+                value: l,
+                label: t(`settings.meeting.latency.${l}`),
+              }))}
+              onSelect={(v) => update({ latency_profile: v as LatencyProfile })}
+            />
+          </SettingContainer>
+        )}
         <SettingContainer
           title={t("settings.meeting.asrModel.label")}
           description={t("settings.meeting.asrModel.description")}
@@ -105,21 +168,32 @@ export const MeetingSettings: React.FC = () => {
             onSelect={(v) => update({ asr_model: v || null })}
           />
         </SettingContainer>
-        <SettingContainer
-          title={t("settings.meeting.backend.label")}
-          description={t("settings.meeting.backend.description")}
-          grouped={true}
-        >
-          <Dropdown
-            selectedValue={settings.diarizer_backend}
-            options={BACKENDS.map((b) => ({
-              value: b,
-              label: t(`settings.meeting.backend.${b}`),
-            }))}
-            onSelect={(v) => update({ diarizer_backend: v as DiarizerBackend })}
-          />
-        </SettingContainer>
+        {!cloudMeetings && (
+          <SettingContainer
+            title={t("settings.meeting.backend.label")}
+            description={t("settings.meeting.backend.description")}
+            grouped={true}
+          >
+            <Dropdown
+              selectedValue={settings.diarizer_backend}
+              options={BACKENDS.map((b) => ({
+                value: b,
+                label: t(`settings.meeting.backend.${b}`),
+              }))}
+              onSelect={(v) =>
+                update({ diarizer_backend: v as DiarizerBackend })
+              }
+            />
+          </SettingContainer>
+        )}
       </SettingsGroup>
+      {cloudMeetings && (
+        <>
+          <OpenAiMeetingGroup />
+          {/* The model's own settings, when the Models page doesn't show them */}
+          {dictationModel !== "openai" && <OpenAiSettings />}
+        </>
+      )}
       <SettingsGroup title={t("meeting.savedTo")}>
         <SettingContainer
           title={t("settings.meeting.outputDir.label")}
@@ -159,6 +233,7 @@ export const MeetingSettings: React.FC = () => {
           grouped={true}
         />
       </SettingsGroup>
+      <AiInstructions outputDir={settings.output_dir} />
     </div>
   );
 };

@@ -63,7 +63,7 @@
     "permissions": {
       "microphone": {
         "name": "Microfoon",
-        "why": "Zodat MeetScribe je kan horen. Audio wordt op deze computer omgezet in tekst en nooit geüpload."
+        "why": "Zodat MeetScribe je kan horen. Audio wordt op deze computer omgezet in tekst en nooit geüpload bij gebruik van lokale modellen."
       },
       "accessibility": {
         "name": "Toegankelijkheid",
@@ -322,7 +322,8 @@
     "modelUnloaded": "Model ontladen",
     "noModelDownloadRequired": "Geen model - Download vereist",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Je kunt van model wisselen zodra het transcriberen in Geschiedenis klaar is."
+    "lockedWhileTranscribing": "Je kunt van model wisselen zodra het transcriberen in Geschiedenis klaar is.",
+    "cloud": "Cloud"
   },
   "settings": {
     "modelSettings": {
@@ -887,11 +888,6 @@
     },
     "meeting": {
       "title": "Vergaderingen",
-      "open": {
-        "label": "Vergadervenster",
-        "description": "Open het venster met het live transcript.",
-        "button": "Openen"
-      },
       "maxSpeakers": {
         "label": "Maximum aantal sprekers",
         "description": "Bovengrens voor het aantal verschillende sprekers (1–8). Boven vier daalt de nauwkeurigheid."
@@ -919,7 +915,7 @@
       },
       "asrModel": {
         "label": "Transcriptiemodel voor vergaderingen",
-        "description": "Spraakmodel tijdens vergaderingen. Parakeet geeft tijden per woord (beste sprekertoewijzing); Whisper per zin.",
+        "description": "Spraakmodel tijdens vergaderingen. OpenAI bepaalt ook de sprekers in de cloud; Parakeet geeft tijden per woord (beste sprekertoewijzing); Whisper per zin.",
         "same": "Zelfde als dicteren"
       },
       "backend": {
@@ -928,6 +924,31 @@
         "python_sidecar": "Nemotron 3 Diarization (Python-prototype)",
         "auto": "Automatisch (native indien beschikbaar)",
         "native": "Nemotron 3 Diarization (native, Metal)"
+      },
+      "openai": {
+        "title": "Met OpenAI",
+        "notes": {
+          "label": "AI-vergadernotities",
+          "description": "Na een vergadering een samenvatting met beslissingen en actiepunten naast de transcriptie schrijven."
+        },
+        "notesModel": {
+          "label": "Model voor notities",
+          "description": "Model dat de vergadernotities schrijft."
+        },
+        "finalPass": {
+          "label": "Laatste sprekerscontrole",
+          "description": "Na de vergadering opnieuw bepalen wie wanneer sprak op basis van de volledige opname. Veel nauwkeuriger dan de live labels; duurt ongeveer een derde van de vergaderduur."
+        },
+        "description": "Gebruikt als vergaderingen op het OpenAI-model draaien."
+      },
+      "ai": {
+        "title": "Gebruiken met je AI",
+        "description": "Instructies voor Claude, ChatGPT, Codex of een andere AI, met je vergadermap ingevuld. Ze leggen de live transcriptie van de lopende vergadering uit (current.vtt, groeit nog) en de vorige vergaderingen in de map. Plak ze als prompt, of bewaar ze als SKILL.md voor Claude Code.",
+        "copy": "Instructies kopiëren",
+        "copied": "Gekopieerd",
+        "show": "Tonen",
+        "hide": "Verbergen",
+        "hint": "De live transcriptie is een WebVTT-bestand dat alleen aangroeit zolang de vergadering loopt."
       }
     }
   },
@@ -1015,7 +1036,7 @@
     "stop": "Vergadering stoppen",
     "starting": "Bezig met starten… modellen laden",
     "stopping": "Afronden en opslaan…",
-    "idleHint": "Start een vergadering voor een live transcript met sprekerlabels. Alles blijft op deze Mac.",
+    "idleHint": "Start een vergadering voor een live transcript met sprekerlabels.",
     "waiting": "Aan het luisteren… tekst verschijnt kort na elke zin.",
     "speakers": "Sprekers",
     "noSpeakers": "Nog geen sprekers",
@@ -1051,6 +1072,30 @@
       "disabledHelp": "Om dit in meetings te gebruiken, open je het hoofdvenster van MeetScribe en ga je naar Instellingen → Geavanceerd. Zet Experimentele functies aan en zet daarna Naverwerking aan in de groep Experimenteel. Stel vervolgens een provider, model en API-sleutel in op de pagina Naverwerking die in de zijbalk verschijnt, en kies de optie hier opnieuw.",
       "progress": "Transcript opschonen… {{done}}/{{total}}",
       "savedTo": "Opgeschoond transcript opgeslagen"
+    },
+    "notesSaved": "Notities",
+    "openWindow": "Vergadervenster openen",
+    "running": "Vergadering bezig",
+    "startHint": "Live transcriptie met sprekerslabels. Het vergadervenster opent bij de start."
+  },
+  "openai": {
+    "keyMissing": "Geen OpenAI API-sleutel gevonden. Kies het model om te zien waar die moet staan.",
+    "settings": {
+      "title": "OpenAI-model",
+      "description": "Geldt zolang OpenAI het gekozen model is. De audio gaat naar OpenAI; er wordt niets gedownload.",
+      "key": {
+        "label": "OpenAI API-sleutel",
+        "found": "Gevonden ({{source}}).",
+        "missing": "Niet gevonden. Zet OPENAI_API_KEY, bewaar de sleutel in de keyring (service=openai, account=api-key) of vul hem in onder Nabewerking → OpenAI."
+      },
+      "languages": {
+        "label": "Gesproken talen",
+        "description": "ISO-codes van de talen die gesproken worden, bv. \"nl, en\". Gebruikt als de taal op automatisch staat."
+      },
+      "transcribeModel": {
+        "label": "Transcriptiemodel",
+        "description": "gpt-transcribe is het nauwkeurigste spraak-naar-tekstmodel van OpenAI."
+      }
     }
   }
 }

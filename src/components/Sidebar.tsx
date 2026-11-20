@@ -110,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className="flex flex-col w-40 h-full border-e border-line items-center px-2">
-      <HandyTextLogo width={120} className="m-4" />
+      <HandyTextLogo width={128} className="my-4" />
       <div className="flex flex-col w-full items-center gap-1 pt-2 border-t border-line">
         {availableSections.map((section) => {
           const Icon = section.icon;

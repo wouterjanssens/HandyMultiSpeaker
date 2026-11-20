@@ -40,6 +40,11 @@ pub struct TurnConfig {
     pub align: AlignConfig,
     /// A pause longer than this starts a new turn even for the same speaker (readability).
     pub max_pause_ms: u64,
+    /// A turn whose words are all final locks once it is this long, even while its speaker keeps
+    /// talking (the rest starts a new turn). Without it a monologue, or two voices the live
+    /// diarizer can't tell apart, stays one open turn until the meeting ends, and nothing reaches
+    /// the live transcript file.
+    pub max_turn_ms: u64,
 }
 
 impl Default for TurnConfig {
@@ -47,6 +52,7 @@ impl Default for TurnConfig {
         Self {
             align: AlignConfig::default(),
             max_pause_ms: 8_000,
+            max_turn_ms: 20_000,
         }
     }
 }
@@ -78,6 +84,20 @@ impl TurnBuilder {
             let pos = self.open_words.partition_point(|x| x.t0_ms <= w.t0_ms);
             self.open_words.insert(pos, w);
         }
+    }
+
+    /// Replaces the open words starting in `[t0_ms, t1_ms)` with `words` (e.g. an utterance first
+    /// shown as one span, then split per speaker). Words already in locked turns are kept.
+    /// Call [`Self::refresh`] afterwards.
+    pub fn replace_span(
+        &mut self,
+        t0_ms: u64,
+        t1_ms: u64,
+        words: impl IntoIterator<Item = TimedWord>,
+    ) {
+        self.open_words
+            .retain(|w| !(w.t0_ms >= t0_ms && w.t0_ms < t1_ms));
+        self.add_words(words);
     }
 
     /// Re-attributes open words against `activity`, locks settled turns and returns UI events.
@@ -114,7 +134,8 @@ impl TurnBuilder {
         let mut open = group(attributed, self.cfg.max_pause_ms);
 
         // Lock leading turns that are entirely final and followed by a final word of the next
-        // turn (so they can neither grow nor merge). On finish, lock everything.
+        // turn (so they can neither grow nor merge), or that are already long enough. On finish,
+        // lock everything.
         let mut n_lock = 0;
         while n_lock < open.len() {
             let turn = &open[n_lock];
@@ -123,7 +144,8 @@ impl TurnBuilder {
                 .get(n_lock + 1)
                 .map(|t| !t.words[0].tentative)
                 .unwrap_or(finish);
-            if all_final && next_final {
+            let long = turn.end_ms.saturating_sub(turn.start_ms) >= self.cfg.max_turn_ms;
+            if all_final && (next_final || long) {
                 n_lock += 1;
             } else {
                 break;
@@ -236,10 +258,43 @@ mod tests {
             .collect()
     }
 
+    #[test]
+    fn a_span_shown_whole_can_be_split_per_speaker() {
+        let mut b = TurnBuilder::new(TurnConfig::default());
+        b.add_words(words(&[(0, 4_000, "hallo allemaal thanks")]));
+        b.refresh(&activity(4_000, 0, &[]));
+        b.replace_span(0, 4_000, words(&[(0, 2_000, "hallo allemaal"), (2_000, 4_000, "thanks")]));
+        b.finish(&activity(4_000, 4_000, &[(0, 2_000, 0), (2_000, 4_000, 1)]));
+        assert_eq!(
+            texts(&b),
+            vec![
+                (Some(0), "hallo allemaal".to_string(), true),
+                (Some(1), "thanks".to_string(), true)
+            ]
+        );
+    }
+
     fn texts(b: &TurnBuilder) -> Vec<(Option<u8>, String, bool)> {
         b.turns()
             .map(|t| (t.speaker, t.text.clone(), t.locked))
             .collect()
+    }
+
+    #[test]
+    fn a_long_final_monologue_locks_without_a_next_speaker() {
+        let a = activity(26_000, 26_000, &[(0, 26_000, 0)]);
+        let mut b = TurnBuilder::new(TurnConfig::default());
+        b.add_words(words(&[(100, 6_000, "een"), (6_500, 14_000, "lang"), (14_500, 21_000, "verhaal")]));
+        b.refresh(&a);
+        assert_eq!(
+            texts(&b),
+            vec![(Some(0), "een lang verhaal".to_string(), true)]
+        );
+        // the same speaker carries on in a new turn
+        b.add_words(words(&[(21_500, 23_000, "verder")]));
+        b.refresh(&a);
+        assert_eq!(b.locked_count(), 1);
+        assert_eq!(texts(&b)[1], (Some(0), "verder".to_string(), false));
     }
 
     #[test]

@@ -173,6 +173,7 @@ export const ModelTableRow: React.FC<ModelTableRowProps> = ({
           {role && !tail && (
             <Tag {...vt?.("r")}>{t(`modelTable.roles.${ROLE_KEYS[role]}`)}</Tag>
           )}
+          {entry.kind === "cloud" && <Tag>{t("modelSelector.cloud")}</Tag>}
           {entry.kind === "custom" && <Tag>{t("modelSelector.custom")}</Tag>}
           {entry.kind === "legacy" && (
             <Tag>{t("onboarding.migration.oldFormat")}</Tag>
