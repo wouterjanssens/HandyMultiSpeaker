@@ -66,7 +66,30 @@ pub struct Shared {
     pub post_process_prompt_id: Option<String>,
     /// LLM-cleaned text of locked turns, by turn id.
     pub cleaned: HashMap<u32, String>,
+    /// meetscribe: utterance spans (ms), for cutting the recording at pauses (OpenAI final pass).
+    pub utterance_spans: Vec<(u64, u64)>,
+    /// meetscribe: file name (no extension) all of this meeting's files use, reserved at start.
+    pub stem: String,
+    /// meetscribe: the live `.vtt` transcript; `None` once the meeting has ended (or when the
+    /// file could not be created).
+    pub live: Option<super::live::LiveVtt>,
 }
+
+/// meetscribe: what a meeting that ran on OpenAI still needs once it has stopped (the final
+/// speaker pass and the notes). Carried to the post-processing worker, so Stop never waits for
+/// it. Only meetings on the OpenAI model have one.
+pub struct CloudFinish {
+    client: crate::openai::Client,
+    settings: crate::openai::OpenAiSettings,
+    keywords: Vec<String>,
+    /// The recording for the final speaker pass; `None` when that pass is off.
+    wav: Option<PathBuf>,
+    /// The recording is the user's "save audio" file; otherwise it is deleted afterwards.
+    keep_wav: bool,
+}
+
+/// Prefix of the temporary recording the final speaker pass uses without "save audio".
+const TEMP_WAV_PREFIX: &str = "meetscribe-";
 
 #[derive(Debug, Default, Clone, Serialize, specta::Type)]
 pub struct Stats {
@@ -83,6 +106,7 @@ pub struct Session {
     asr: Option<JoinHandle<()>>,
     diar: Option<JoinHandle<()>>,
     settings: MeetingSettings,
+    cloud_finish: Option<CloudFinish>,
     /// Set when audio comes from `MEETSCRIBE_SIMULATE_WAV` instead of the microphone.
     simulation: Option<(Arc<AtomicBool>, JoinHandle<()>)>,
     /// Hands the finished meeting to the post-processing worker.
@@ -95,10 +119,34 @@ pub struct MeetingOutput {
     pub markdown_path: Option<String>,
     pub json_path: Option<String>,
     pub audio_path: Option<String>,
+    /// AI meeting notes (OpenAI), when enabled.
+    pub notes_path: Option<String>,
+    /// meetscribe: the WebVTT transcript (live during the meeting, final afterwards).
+    pub vtt_path: Option<String>,
     pub error: Option<String>,
 }
 
-fn emit_turn_events(app: &AppHandle, shared: &mut Shared, events: Vec<TurnEvent>) {
+impl Shared {
+    // meetscribe: used by the OpenAI pipeline (`cloud.rs`)
+    pub(crate) fn push_asr_delay(&mut self, delay_ms: u32) {
+        self.asr_delays_ms.push(delay_ms);
+    }
+
+    /// Re-attributes open words against the current activity and emits the UI events.
+    pub(crate) fn refresh_and_emit(&mut self, app: &AppHandle) {
+        let events = {
+            let Shared {
+                turns, activity, ..
+            } = &mut *self;
+            turns.refresh(activity)
+        };
+        if !events.is_empty() {
+            emit_turn_events(app, self, events);
+        }
+    }
+}
+
+pub(crate) fn emit_turn_events(app: &AppHandle, shared: &mut Shared, events: Vec<TurnEvent>) {
     // display numbers follow first appearance in the transcript (see SpeakerMap)
     for ev in &events {
         if let TurnEvent::Appended { turn } | TurnEvent::Updated { turn } = ev {
@@ -124,6 +172,16 @@ fn emit_turn_events(app: &AppHandle, shared: &mut Shared, events: Vec<TurnEvent>
         };
         let _ = app.emit(name, payload);
     }
+    // meetscribe: finished turns go to the live transcript file
+    let Shared {
+        live,
+        turns,
+        speakers,
+        ..
+    } = shared;
+    if let Some(live) = live.as_mut() {
+        live.sync(turns, speakers);
+    }
 }
 
 fn emit_status(app: &AppHandle, shared: &Shared) {
@@ -143,11 +201,19 @@ impl Session {
         app: &AppHandle,
         settings: MeetingSettings,
         diarizer: Box<dyn StreamingDiarizer>,
+        cloud: Option<super::cloud::CloudConfig>,
     ) -> Result<Self> {
         let tm = app.state::<Arc<TranscriptionManager>>().inner().clone();
         let rm = app.state::<Arc<AudioRecordingManager>>().inner().clone();
 
-        if let Some(model) = &settings.asr_model {
+        if let Some(c) = &cloud {
+            // meetscribe: OpenAI does the transcription; no local model to load
+            log::info!(
+                "Meeting on OpenAI: {} + {}",
+                c.settings.transcribe_model,
+                c.settings.diarize_model
+            );
+        } else if let Some(model) = &settings.asr_model {
             if tm.get_current_model().as_deref() != Some(model) {
                 tm.load_model(model)
                     .context("failed to load the meeting ASR model")?;
@@ -155,19 +221,48 @@ impl Session {
         } else if !tm.is_model_loaded() {
             tm.initiate_model_load();
         }
-        let asr_model = tm
-            .get_current_model()
-            .or_else(|| settings.asr_model.clone())
-            .unwrap_or_default();
-
-        let hint_support = app
-            .state::<Arc<crate::managers::model::ModelManager>>()
-            .get_model_path(&asr_model)
-            .map(|p| super::language::HintSupport::probe(&p))
-            .unwrap_or_default();
+        let (asr_model, hint_support) = match &cloud {
+            Some(c) => (
+                format!("{} (OpenAI)", c.settings.transcribe_model),
+                super::language::HintSupport {
+                    honored: Some(true),
+                    codes: super::settings::MEETING_LANGUAGES
+                        .iter()
+                        .map(|l| l.to_string())
+                        .collect(),
+                },
+            ),
+            None => {
+                let asr_model = tm
+                    .get_current_model()
+                    .or_else(|| settings.asr_model.clone())
+                    .unwrap_or_default();
+                let hint_support = app
+                    .state::<Arc<crate::managers::model::ModelManager>>()
+                    .get_model_path(&asr_model)
+                    .map(|p| super::language::HintSupport::probe(&p))
+                    .unwrap_or_default();
+                (asr_model, hint_support)
+            }
+        };
         log::info!("Meeting ASR model {asr_model}: language hint support {hint_support:?}");
 
         let started = chrono::Local::now();
+        // meetscribe: one file name for everything this meeting writes, reserved now so the live
+        // transcript and the final files match
+        let output_dir = settings.resolved_output_dir(app);
+        let started_label = started.format("%Y-%m-%d %H:%M").to_string();
+        let stem = reserve_stem(&output_dir, &export::file_stem(&started_label));
+        let live = match super::live::LiveVtt::create(&output_dir, &stem, &started_label) {
+            Ok(live) => {
+                log::info!("Live transcript: {}", live.path().display());
+                Some(live)
+            }
+            Err(e) => {
+                log::warn!("No live transcript file: {e:#}");
+                None
+            }
+        };
         let shared = Arc::new(Mutex::new(Shared {
             activity: SpeakerActivity::new(diarizer.num_speakers(), diarizer.frame_ms()),
             turns: TurnBuilder::new(TurnConfig::default()),
@@ -186,6 +281,9 @@ impl Session {
             post_process_mode: settings.post_process_mode,
             post_process_prompt_id: settings.post_process_prompt_id.clone(),
             cleaned: HashMap::new(),
+            utterance_spans: Vec::new(),
+            stem,
+            live,
         }));
 
         let (diar_tx, diar_rx) = mpsc::channel::<Frame>();
@@ -195,8 +293,27 @@ impl Session {
             let s = shared.lock().unwrap();
             settings
                 .resolved_output_dir(app)
-                .join(format!("{}.wav", export::file_stem(&s.started_local)))
+                .join(format!("{}.wav", s.stem))
         });
+        // meetscribe: the OpenAI final speaker pass needs the recording; without "save audio"
+        // it goes to a temporary file
+        let cloud_finish = cloud.as_ref().map(|c| CloudFinish {
+            client: c.client.clone(),
+            settings: c.settings.clone(),
+            keywords: c.keywords.clone(),
+            wav: c.settings.final_pass.then(|| {
+                audio_path.clone().unwrap_or_else(|| {
+                    let s = shared.lock().unwrap();
+                    std::env::temp_dir().join(format!(
+                        "{TEMP_WAV_PREFIX}{}-{}.wav",
+                        export::file_stem(&s.started_local),
+                        std::process::id()
+                    ))
+                })
+            }),
+            keep_wav: audio_path.is_some(),
+        });
+        let audio_path = audio_path.or_else(|| cloud_finish.as_ref().and_then(|c| c.wav.clone()));
 
         let diar = {
             let app = app.clone();
@@ -211,7 +328,7 @@ impl Session {
             let tm = Arc::clone(&tm);
             std::thread::Builder::new()
                 .name("meeting-asr".into())
-                .spawn(move || asr_worker(app, shared, tm, asr_rx))?
+                .spawn(move || asr_worker(app, shared, tm, asr_rx, cloud))?
         };
 
         let clock = Arc::new(AtomicU64::new(0));
@@ -250,6 +367,7 @@ impl Session {
             asr: Some(asr),
             diar: Some(diar),
             settings,
+            cloud_finish,
             simulation,
         })
     }
@@ -279,6 +397,11 @@ impl Session {
             turns.finish(activity)
         };
         emit_turn_events(app, &mut shared, events);
+        // meetscribe: the live file is complete; the final pass must not append to it
+        let live_vtt = shared
+            .live
+            .take()
+            .map(|live| live.end(&shared.turns, &shared.speakers));
         let mut delays = shared.asr_delays_ms.clone();
         delays.sort_unstable();
         let pct = |p: f64| {
@@ -298,11 +421,14 @@ impl Session {
         let info = meeting_info(&shared);
         let output = write_outputs(app, &self.settings, &shared, &info);
         let history_id = add_to_history(app, &shared, &output);
-        // the worker takes it from here; it is gone only if it panicked
+        // The worker takes it from here (final speaker pass, final `.vtt`, notes, clean-up,
+        // rename); it is gone only if it panicked.
         let _ = self.post_process.send(Finish {
             info,
             output: output.clone(),
             history_id,
+            cloud: self.cloud_finish.take(),
+            live_vtt,
         });
         output
     }
@@ -376,11 +502,12 @@ fn write_outputs(
 ) -> MeetingOutput {
     let mut out = MeetingOutput::default();
     let dir = settings.resolved_output_dir(app);
-    let stem = export::file_stem(&shared.started_local);
+    // meetscribe: the name reserved at start, shared with the live `.vtt`
+    let stem = shared.stem.clone();
     let result = (|| -> Result<()> {
         std::fs::create_dir_all(&dir)
             .with_context(|| format!("cannot create {}", dir.display()))?;
-        let md_path = unique_path(dir.join(format!("{stem}.md")));
+        let md_path = dir.join(format!("{stem}.md"));
         std::fs::write(
             &md_path,
             export::to_markdown(info, shared.turns.turns(), &shared.speakers),
@@ -407,6 +534,220 @@ fn write_outputs(
         out.error = Some(format!("{e:#}"));
     }
     out
+}
+
+/// meetscribe: what has to happen to a stopped meeting before post-processing: the OpenAI final
+/// speaker pass (then the saved transcript and History entry are rewritten), the final `.vtt`,
+/// and the OpenAI notes. Runs on the post-processing worker, never under the session's stop.
+/// Returns true when the turns were replaced (their ids changed).
+pub(super) fn finish_after_stop(
+    app: &AppHandle,
+    shared: &Arc<Mutex<Shared>>,
+    finish: &mut Finish,
+) -> bool {
+    let mut replaced = false;
+    if let Some(cloud) = &finish.cloud {
+        if let Some(wav) = &cloud.wav {
+            replaced = run_final_pass(app, shared, cloud, wav);
+            if replaced {
+                rewrite_outputs(app, shared, finish);
+            }
+            if !cloud.keep_wav {
+                let _ = std::fs::remove_file(wav);
+            }
+        }
+    }
+    if let Some(path) = finish.live_vtt.take() {
+        // (no file name in it: post-processing may still rename the meeting's files)
+        let document = {
+            let s = shared.lock().unwrap();
+            meeting_core::vtt::final_document(&s.started_local, s.turns.turns(), &s.speakers, None)
+        };
+        super::live::finalize(&path, &document);
+        finish.output.vtt_path = Some(path.to_string_lossy().into_owned());
+    }
+    if let Some(cloud) = finish.cloud.as_ref().filter(|c| c.settings.notes) {
+        finish.output.notes_path = write_notes(app, shared, cloud, &finish.output);
+    }
+    // the meeting window shows the files; tell it about the ones added since Stop, unless a new
+    // meeting has started in the window since
+    if super::phase(app) == super::MeetingPhase::Idle {
+        let _ = app.emit("meeting:stopped", finish.output.clone());
+    }
+    replaced
+}
+
+/// meetscribe: replaces the live speaker labels with the OpenAI full-recording pass. The lock is
+/// only held to copy the input and to swap in the result. On failure the live transcript is kept.
+fn run_final_pass(
+    app: &AppHandle,
+    shared: &Arc<Mutex<Shared>>,
+    cloud: &CloudFinish,
+    wav: &Path,
+) -> bool {
+    let (live, spans, language) = {
+        let s = shared.lock().unwrap();
+        let live: Vec<meeting_core::AttributedWord> = s
+            .turns
+            .turns()
+            .flat_map(|t| t.words.iter().cloned())
+            .collect();
+        (live, s.utterance_spans.clone(), s.language.clone())
+    };
+    if spans.is_empty() {
+        return false;
+    }
+    let languages = if language == "auto" {
+        cloud.settings.languages.clone()
+    } else {
+        vec![language]
+    };
+    let started = Instant::now();
+    let refined = match super::refine::run(
+        &cloud.client,
+        &cloud.settings,
+        wav,
+        &spans,
+        &live,
+        &languages,
+        &cloud.keywords,
+    ) {
+        Ok(r) => r,
+        Err(e) => {
+            log::error!("Final speaker pass failed, keeping live speakers: {e:#}");
+            let _ = app.emit(
+                "meeting:error",
+                format!("Final speaker pass failed (live speakers kept): {e:#}"),
+            );
+            return false;
+        }
+    };
+    let mut s = shared.lock().unwrap();
+    let old_ids: Vec<u32> = s.turns.turns().map(|t| t.id).collect();
+    let mut turns = TurnBuilder::new(TurnConfig::default());
+    turns.add_words(refined.words);
+    turns.finish(&refined.activity);
+    s.turns = turns;
+    s.activity = refined.activity;
+    // cleaned text belongs to the old turns
+    s.cleaned.clear();
+    for id in old_ids.into_iter().rev() {
+        let _ = app.emit("meeting:turn_removed", id);
+    }
+    let appended: Vec<TurnEvent> = s
+        .turns
+        .turns()
+        .map(|t| TurnEvent::Appended { turn: t.clone() })
+        .collect();
+    emit_turn_events(app, &mut s, appended);
+    log::info!(
+        "Final speaker pass in {:.1}s: {} speakers, {} spans split",
+        started.elapsed().as_secs_f64(),
+        refined.speakers,
+        refined.splits
+    );
+    true
+}
+
+/// meetscribe: writes the transcript and History entry again after the final speaker pass, at the
+/// paths saved at Stop.
+fn rewrite_outputs(app: &AppHandle, shared: &Arc<Mutex<Shared>>, finish: &Finish) {
+    let s = shared.lock().unwrap();
+    let result = (|| -> Result<()> {
+        if let Some(md) = &finish.output.markdown_path {
+            std::fs::write(
+                md,
+                export::to_markdown(&finish.info, s.turns.turns(), &s.speakers),
+            )?;
+        }
+        if let Some(json) = &finish.output.json_path {
+            std::fs::write(
+                json,
+                export::to_json(&finish.info, s.turns.turns(), &s.speakers)?,
+            )?;
+        }
+        Ok(())
+    })();
+    if let Err(e) = result {
+        log::error!("Failed to rewrite the meeting after the speaker pass: {e:#}");
+    }
+    if let Some(id) = finish.history_id {
+        let text = export::transcript_text(s.turns.turns(), &s.speakers);
+        if let Err(e) = app
+            .state::<Arc<crate::managers::history::HistoryManager>>()
+            .update_transcription(id, text.trim_end().to_string(), None, None)
+        {
+            log::error!("Failed to update the meeting in history: {e:#}");
+        }
+    }
+}
+
+/// meetscribe: AI meeting notes next to the transcript (`…_notes.md`). Failures are logged and
+/// reported, never fatal.
+fn write_notes(
+    app: &AppHandle,
+    shared: &Arc<Mutex<Shared>>,
+    cloud: &CloudFinish,
+    output: &MeetingOutput,
+) -> Option<String> {
+    let (started_local, utterances) = {
+        let s = shared.lock().unwrap();
+        (s.started_local.clone(), s.stats.utterances)
+    };
+    let md_path = PathBuf::from(output.markdown_path.as_ref()?);
+    if utterances == 0 {
+        return None;
+    }
+    let transcript = std::fs::read_to_string(&md_path).ok()?;
+    let started = Instant::now();
+    let model = &cloud.settings.notes_model;
+    match crate::openai::notes::generate(&cloud.client, model, &transcript) {
+        Ok(notes) => {
+            let stem = md_path.file_stem()?.to_string_lossy().into_owned();
+            let path = md_path.with_file_name(format!("{stem}_notes.md"));
+            let doc = format!(
+                "# Notes – {started_local}\n\n_Generated by {model} from [{}]({})._\n\n{notes}\n",
+                md_path.file_name()?.to_string_lossy(),
+                md_path.file_name()?.to_string_lossy().replace(' ', "%20"),
+            );
+            match std::fs::write(&path, doc) {
+                Ok(()) => {
+                    log::info!(
+                        "Meeting notes written in {:.1}s: {}",
+                        started.elapsed().as_secs_f64(),
+                        path.display()
+                    );
+                    Some(path.to_string_lossy().into_owned())
+                }
+                Err(e) => {
+                    log::error!("Cannot write meeting notes: {e}");
+                    None
+                }
+            }
+        }
+        Err(e) => {
+            log::error!("Meeting notes failed: {e:#}");
+            let _ = app.emit("meeting:error", format!("Meeting notes failed: {e:#}"));
+            None
+        }
+    }
+}
+
+/// meetscribe: removes final-pass recordings left in the temp folder by a crash. Called at
+/// startup, when no meeting can be running.
+pub fn remove_stale_recordings() {
+    let Ok(entries) = std::fs::read_dir(std::env::temp_dir()) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if name.starts_with(TEMP_WAV_PREFIX) && name.ends_with(".wav") {
+            match std::fs::remove_file(entry.path()) {
+                Ok(()) => log::info!("Removed a stale meeting recording: {name}"),
+                Err(e) => log::warn!("Cannot remove {name}: {e}"),
+            }
+        }
+    }
 }
 
 /// Lists the saved meeting in History and returns the entry's id. A meeting in which nothing was
@@ -448,7 +789,23 @@ pub(super) fn unique_path(path: PathBuf) -> PathBuf {
     (2..)
         .map(|i| path.with_file_name(format!("{stem} ({i}).{ext}")))
         .find(|p| !p.exists())
-        .expect("unbounded")
+        .unwrap_or(path)
+}
+
+/// meetscribe: a file stem none of whose files (`.md`, `.vtt`) exist yet: `stem`, `stem (2)`, …
+fn reserve_stem(dir: &Path, stem: &str) -> String {
+    let free = |s: &str| {
+        ["md", "vtt"]
+            .iter()
+            .all(|ext| !dir.join(format!("{s}.{ext}")).exists())
+    };
+    if free(stem) {
+        return stem.to_string();
+    }
+    (2..)
+        .map(|i| format!("{stem} ({i})"))
+        .find(|s| free(s))
+        .unwrap_or_else(|| stem.to_string())
 }
 
 fn apply_update(app: &AppHandle, shared: &Arc<Mutex<Shared>>, update: DiarUpdate, audio_end: u64) {
@@ -552,7 +909,18 @@ fn asr_worker(
     shared: Arc<Mutex<Shared>>,
     tm: Arc<TranscriptionManager>,
     rx: Receiver<Frame>,
+    cloud: Option<super::cloud::CloudConfig>,
 ) {
+    // meetscribe: with OpenAI, utterances go to the cloud pipeline instead of the local model
+    let cloud = cloud.map(|cfg| {
+        let (tx, utt_rx) = mpsc::channel::<Utterance>();
+        let (app, shared) = (app.clone(), Arc::clone(&shared));
+        let worker = std::thread::Builder::new()
+            .name("meeting-openai-text".into())
+            .spawn(move || super::cloud::run(app, shared, cfg, utt_rx))
+            .expect("spawn OpenAI meeting pipeline");
+        (tx, worker)
+    });
     let backend = crate::settings::get_settings(&app).vad_backend;
     let mut vad = match crate::managers::audio::create_detector(backend, &app) {
         Ok(v) => v,
@@ -568,7 +936,12 @@ fn asr_worker(
     let mut pending: Vec<f32> = Vec::new();
     let mut pending_start = 0u64;
 
-    let handle = |u: Utterance| transcribe_utterance(&app, &shared, &tm, u);
+    let handle = |u: Utterance| match &cloud {
+        Some((tx, _)) => {
+            let _ = tx.send(u);
+        }
+        None => transcribe_utterance(&app, &shared, &tm, u),
+    };
     for f in rx.iter() {
         if pending.is_empty() {
             pending_start = f.start;
@@ -593,6 +966,10 @@ fn asr_worker(
     }
     if let Some(u) = seg.flush() {
         handle(u);
+    }
+    if let Some((tx, worker)) = cloud {
+        drop(tx);
+        let _ = worker.join();
     }
 }
 

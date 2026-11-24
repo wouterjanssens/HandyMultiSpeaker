@@ -453,6 +453,9 @@ impl ShortcutAction for TranscribeAction {
         let tm = app.state::<Arc<TranscriptionManager>>();
         let rm = app.state::<Arc<AudioRecordingManager>>();
 
+        // meetscribe: a cloud model (OpenAI) has no file to check
+        let cloud_dictation = crate::openai::is_selected(app);
+
         // Load ASR model and VAD model in parallel
         let kickoff_started = Instant::now();
         tm.initiate_model_load();
@@ -466,7 +469,7 @@ impl ShortcutAction for TranscribeAction {
 
         // Don't open the mic if nothing can transcribe the recording; the load
         // kicked off above fails and reports why.
-        if !tm.is_model_loaded() {
+        if !cloud_dictation && !tm.is_model_loaded() {
             let selected_model = get_settings(app).selected_model;
             if let Err(e) = app
                 .state::<Arc<ModelManager>>()

@@ -2,8 +2,8 @@ import { createContext, useContext } from "react";
 import type { CatalogModel } from "@handy-computer/models";
 import type { Grading } from "@/lib/models/grading";
 
-/** Curated (onboarding offers it), catalog (untested), custom or legacy. */
-export type ModelKind = "curated" | "catalog" | "custom" | "legacy";
+/** Curated (onboarding offers it), catalog (untested), cloud (meetscribe: OpenAI), custom or legacy. */
+export type ModelKind = "curated" | "catalog" | "cloud" | "custom" | "legacy";
 
 /** A model as the table shows it, whichever page's list it came from. */
 export interface TableModel {

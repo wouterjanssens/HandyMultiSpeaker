@@ -322,7 +322,8 @@
     "modelUnloaded": "Model Boşaltıldı",
     "noModelDownloadRequired": "Model Yok – İndirme Gerekli",
     "downloadSpeed": "{{speed}} MB/s",
-    "lockedWhileTranscribing": "Geçmiş'teki yazıya dökme bitince modeli değiştirebilirsiniz."
+    "lockedWhileTranscribing": "Geçmiş'teki yazıya dökme bitince modeli değiştirebilirsiniz.",
+    "cloud": "Cloud"
   },
   "settings": {
     "modelSettings": {
@@ -887,11 +888,6 @@
     },
     "meeting": {
       "title": "Meetings",
-      "open": {
-        "label": "Meeting window",
-        "description": "Open the live meeting transcript window.",
-        "button": "Open"
-      },
       "maxSpeakers": {
         "label": "Maximum speakers",
         "description": "Upper bound on distinct speakers in a transcript (1–8). Accuracy drops above about four."
@@ -928,6 +924,31 @@
         "python_sidecar": "Nemotron 3 Diarization (Python prototype)",
         "auto": "Automatic (native if available)",
         "native": "Nemotron 3 Diarization (native, Metal)"
+      },
+      "openai": {
+        "title": "With OpenAI",
+        "notes": {
+          "label": "AI meeting notes",
+          "description": "After a meeting, write a summary with decisions and action items next to the transcript."
+        },
+        "notesModel": {
+          "label": "Notes model",
+          "description": "Model that writes the meeting notes."
+        },
+        "finalPass": {
+          "label": "Final speaker pass",
+          "description": "After the meeting, re-check who spoke when using the whole recording. Much more accurate than the live labels; takes about a third of the meeting length."
+        },
+        "description": "Used when meetings run on the OpenAI model."
+      },
+      "ai": {
+        "title": "Use with your AI",
+        "description": "Instructions for Claude, ChatGPT, Codex or any other AI, with your meetings folder filled in. They explain the live transcript of the meeting running now (current.vtt, still growing) and the past meetings in the folder. Paste them as a prompt, or save them as SKILL.md for Claude Code.",
+        "copy": "Copy instructions",
+        "copied": "Copied",
+        "show": "Show",
+        "hide": "Hide",
+        "hint": "The live transcript is a WebVTT file that only grows while the meeting runs."
       }
     }
   },
@@ -1051,6 +1072,30 @@
       "disabledHelp": "To use it in meetings, open the main MeetScribe window and go to Settings → Advanced. Turn on Experimental Features, then turn on Post Processing in the Experimental group. After that, set a provider, model and API key on the Post Processing page that appears in the sidebar, and pick the option here again.",
       "progress": "Cleaning up transcript… {{done}}/{{total}}",
       "savedTo": "Cleaned transcript saved"
+    },
+    "notesSaved": "Notes",
+    "openWindow": "Open meeting window",
+    "running": "Meeting running",
+    "startHint": "Live transcript with speaker labels. The meeting window opens when it starts."
+  },
+  "openai": {
+    "keyMissing": "No OpenAI API key found. Pick it to see where to put one.",
+    "settings": {
+      "title": "OpenAI model",
+      "description": "Applies while OpenAI is the model in use. Audio goes to OpenAI; nothing is downloaded.",
+      "key": {
+        "label": "OpenAI API key",
+        "found": "Found ({{source}}).",
+        "missing": "Not found. Set OPENAI_API_KEY, store it in the keyring (service=openai, account=api-key) or enter it under Post Processing → OpenAI."
+      },
+      "languages": {
+        "label": "Spoken languages",
+        "description": "ISO codes of the languages people speak, e.g. \"nl, en\". Used when the language is set to automatic."
+      },
+      "transcribeModel": {
+        "label": "Transcription model",
+        "description": "gpt-transcribe is OpenAI's most accurate speech-to-text model."
+      }
     }
   }
 }

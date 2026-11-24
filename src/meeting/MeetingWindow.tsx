@@ -32,6 +32,7 @@ interface MeetingOutput {
   markdown_path: string | null;
   json_path: string | null;
   audio_path: string | null;
+  notes_path: string | null;
   error: string | null;
 }
 
@@ -564,6 +565,21 @@ const MeetingWindow: React.FC = () => {
               size="sm"
               variant="ghost"
               onClick={() => commands.meetingRevealOutput(cleanup.path)}
+            >
+              {t("meeting.reveal")}
+            </Button>
+          </span>
+        )}
+        {output?.notes_path && (
+          <span className="flex items-center gap-2">
+            {t("meeting.notesSaved")}:{" "}
+            <span className="font-mono text-ink-2">
+              {output.notes_path.split(/[\\/]/).pop()}
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => commands.meetingRevealOutput(output.notes_path)}
             >
               {t("meeting.reveal")}
             </Button>

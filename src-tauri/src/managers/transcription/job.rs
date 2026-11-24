@@ -47,6 +47,10 @@ impl TranscriptionManager {
         }
 
         self.touch_activity();
+        // meetscribe: OpenAI cloud model, same chunks, one request each
+        if self.cloud_model_selected() {
+            return self.transcribe_in_chunks_cloud(audio, control);
+        }
         self.initiate_model_load();
         // Read once: the model can't change until the job ends.
         let BatchContext {
@@ -125,6 +129,57 @@ impl TranscriptionManager {
             paragraphs.len(),
             elapsed_secs,
             real_time_factor(audio_secs, elapsed_secs)
+        );
+        Ok(Some(paragraphs.join("\n\n")))
+    }
+}
+
+impl TranscriptionManager {
+    /// meetscribe: [`Self::transcribe_in_chunks`] with the OpenAI cloud model.
+    /// Chunks keep progress, cancel and the request size small.
+    fn transcribe_in_chunks_cloud(
+        &self,
+        audio: Vec<f32>,
+        control: &dyn ChunkControl,
+    ) -> Result<Option<String>> {
+        let started = Instant::now();
+        let total = audio.len();
+        let backend = crate::settings::get_settings(&self.app_handle).vad_backend;
+        let app_handle = self.app_handle.clone();
+        let mut chunker = Chunker::new(Box::new(move || create_detector(backend, &app_handle)));
+        let mut pieces = audio.chunks(FEED_SAMPLES);
+        let mut paragraphs: Vec<String> = Vec::new();
+        let mut done = 0;
+        control.progress(done, total);
+        loop {
+            if !control.proceed() {
+                return Ok(None);
+            }
+            let (chunks, last) = match pieces.next() {
+                Some(piece) => (chunker.push(piece), false),
+                None => (chunker.finish(), true),
+            };
+            for chunk in chunks {
+                if !control.proceed() {
+                    return Ok(None);
+                }
+                let len = chunk.len();
+                let text = crate::openai::transcribe(&self.app_handle, chunk)?;
+                if !text.trim().is_empty() {
+                    paragraphs.push(text);
+                }
+                done += len;
+                control.progress(done, total);
+            }
+            if last {
+                break;
+            }
+        }
+        info!(
+            "Transcribed {:.1}s of audio with OpenAI in {:.1}s ({} chunks)",
+            total as f64 / 16_000.0,
+            started.elapsed().as_secs_f64(),
+            paragraphs.len()
         );
         Ok(Some(paragraphs.join("\n\n")))
     }

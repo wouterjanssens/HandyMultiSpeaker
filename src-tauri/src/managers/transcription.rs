@@ -368,7 +368,21 @@ impl TranscriptionManager {
     pub fn is_model_loaded(&self) -> bool {
         // A transcribe-cpp model stays loaded while it is busy, so a batch
         // run or stream in progress never reads as "unloaded".
-        self.engine.loaded().is_some()
+        self.engine.loaded().is_some() || self.cloud_model_active()
+    }
+
+    /// meetscribe: the current model is a cloud model (OpenAI): nothing is
+    /// loaded and its transcriptions go over the network.
+    pub fn cloud_model_active(&self) -> bool {
+        self.get_current_model()
+            .is_some_and(|id| crate::openai::is_model(&id))
+    }
+
+    /// meetscribe: dictation and file transcriptions go to the cloud model: it
+    /// is the selected model, or it was loaded explicitly (CLI `--model openai`).
+    /// The selection wins over a local model a meeting left loaded.
+    fn cloud_model_selected(&self) -> bool {
+        self.cloud_model_active() || crate::openai::is_selected(&self.app_handle)
     }
 
     /// Accelerator changes should not disturb the current transcription. Mark
@@ -568,6 +582,27 @@ impl TranscriptionManager {
             let error_msg = "Model not downloaded";
             emit_loading_failed(error_msg);
             return Err(anyhow::anyhow!(error_msg));
+        }
+
+        // meetscribe: a cloud model has nothing to load. Free the local model
+        // (without waiting behind a run in progress) and make it current.
+        if model_info.is_cloud() {
+            if self.engine.loaded().is_some() {
+                drop(self.engine.unload());
+            }
+            *self.current_model_id.lock().unwrap() = Some(model_id.to_string());
+            self.touch_activity();
+            let _ = self.app_handle.emit(
+                "model-state-changed",
+                ModelStateEvent {
+                    event_type: "loading_completed".to_string(),
+                    model_id: Some(model_id.to_string()),
+                    model_name: Some(model_info.name.clone()),
+                    error: None,
+                },
+            );
+            info!("Selected cloud model '{}'", model_id);
+            return Ok(());
         }
 
         let model_path = self
@@ -916,12 +951,20 @@ impl TranscriptionManager {
     /// Transcribe a whole clip in batch: a re-transcribed history entry, or
     /// a file from the CLI.
     pub fn transcribe(&self, audio: Vec<f32>) -> Result<String> {
+        // meetscribe: OpenAI cloud model
+        if self.cloud_model_selected() {
+            return crate::openai::transcribe(&self.app_handle, audio);
+        }
         self.complete(Instant::now(), audio, None)
     }
 
     /// Transcribe a finished recording: what its live decode produced, or a
     /// batch run of the whole recording when there is no live result.
     pub fn transcribe_recording(&self, samples: Vec<f32>) -> Result<String> {
+        // meetscribe: OpenAI cloud model (no live decode was started)
+        if self.cloud_model_selected() {
+            return crate::openai::transcribe(&self.app_handle, samples);
+        }
         let started = Instant::now();
         let live = self.finalize_live(samples.len())?;
         self.complete(started, samples, live)
